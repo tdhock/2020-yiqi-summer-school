@@ -1,0 +1,17 @@
+** 4 July 2020
+
+[[file:figure-test-accuracy-data.R]] makes
+[[file:figure-test-accuracy-data.rds]] (4-fold cross-validation estimation
+of test error using three keras neural network models).
+
+[[file:figure-test-accuracy.R]] plot the test accuracy in 4-fold
+cross-validation
+
+[[file:figure-test-accuracy-baseline.png]]
+
+[[file:figure-test-accuracy.png]]
+
+[[file:download.R]] downloads data sets.
+
+[[file:figure-validation-loss.R]] plots subtrain/validation loss for
+three neural network models.
