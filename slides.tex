@@ -215,8 +215,9 @@ f(\includegraphics[width=0.5\textwidth]{retinal-scans/national-geographic-medici
 
 \end{frame}
 
-\section{Practical considerations}
-
+\section{Demonstration of overfitting in regression /
+  first steps with R}
+ 
 \begin{frame}
   \frametitle{Machine learning algorithms in practice}
 
@@ -241,6 +242,71 @@ f(\includegraphics[width=0.5\textwidth]{retinal-scans/national-geographic-medici
     best with respect to the held-out validation set.
   \end{itemize}
   
+\end{frame}
+
+\begin{frame}
+  \frametitle{Goal of this section: demonstrate overfitting}
+  \begin{itemize}
+  \item The goal of supervised machine learning is to get accurate
+    predictions on new/unseen/held-out test data.
+  \item Any machine learning algorithm is prone to overfit, which
+    means providing better predictions on the train/subtrain set than
+    on a held-out validation/test set. (BAD)
+  \item To learn a model which does NOT overfit (GOOD), you need to
+    first divide your train set into subtrain/validation sets.
+  \item Code for figures in this section:
+    \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-overfitting.R}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Three different data sets/patterns}
+  \includegraphics[width=\textwidth]{figure-overfitting-data}
+
+  \begin{itemize}
+   \item We illustrate this using a single input/feature
+    $x\in\mathbb R$.
+  \item We use a regression problem with outputs $y\in\mathbb R$.
+  \item Goal is to learn a function $f(x)\in\mathbb R$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Illustration of 4-fold cross-validation}
+  \includegraphics[width=\textwidth]{figure-overfitting-data-folds}
+
+  Randomly assign each observation a fold ID from 1 to 4.
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Illustration of subtrain/validation split}
+  \includegraphics[width=\textwidth]{figure-overfitting-data-sets}
+
+  \begin{itemize}
+  \item For validation fold 1, all observations with that fold ID are
+    considered the validation set.
+  \item All other observations are considered the subtrain set.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{How to do this in practice? Use R with an IDE}
+  \begin{itemize}
+  \item Machine learning model training/evaluation is easy to code in
+    programming languages which support vectors/matrices.
+  \item I recommend using R because it has so many useful packages
+    (each one for a different machine learning model/algorithm).
+  \item Download R at \url{https://cloud.r-project.org/}
+  \item If you already use Emacs (classic text editor), I recommend
+    using R inside Emacs Speaks Statistics, which is a great
+    Interactive Development Environment (IDE) for R
+    \url{http://ess.r-project.org/} Also see my screencasts about ESS,
+    \url{https://www.youtube.com/playlist?list=PLwc48KSH3D1Onsed66FPLywMSIQmAhUYJ}
+  \item Otherwise, I recommend using RStudio, which is another popular
+    IDE for R
+    \url{https://rstudio.com/products/rstudio/download}
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -294,21 +360,29 @@ fold.vec <- sample(rep(unique.folds, l=N.observations))
 % sets. 2. overfitting/underfitting. 3. data input format for
 % ML. 4. cross-validation fold ID / test/train sets.
 
-\section{Demonstration of overfitting in regression}
 
-\begin{frame}
-  \includegraphics[width=\textwidth]{figure-overfitting-data}
+
+\begin{frame}[fragile]
+  \frametitle{Neural network with one hidden layer, 10 hidden units}
+
+\begin{verbatim}
+for(maxit in c(1, 10, 100, 1000, 10000)){
+  fit <- nnet::nnet(
+    y ~ x,
+    set.data$subtrain,
+    size=10,     #hidden units
+    skip=FALSE,  #no units which skip the hidden layer
+    linout=TRUE, #for regression
+    maxit=maxit) #max number of iterations
+\end{verbatim}
+
 \end{frame}
 
-\begin{frame}
-  \includegraphics[width=\textwidth]{figure-overfitting-data-folds}
-\end{frame}
+\input{figure-overfitting-10}
 
-\begin{frame}
-  \includegraphics[width=\textwidth]{figure-overfitting-data-sets}
-\end{frame}
+\input{figure-overfitting-0}
 
-\input{figure-overfitting}
+\input{figure-overfitting-200}
 
 \section{Classifying images of digits}
 

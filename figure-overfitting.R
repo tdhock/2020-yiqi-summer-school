@@ -8,34 +8,26 @@ if(FALSE){
 keras::use_implementation("keras")
 keras::use_backend("tensorflow")
 
-true.f.list <- list(
-  linear=function(x)2*x + 5,
-  quadratic=function(x)x^2,
-  sin=function(x)5*sin(2*x)+5)
-set.seed(1)
-N <- 100
 n.folds <- 4
 unique.folds <- 1:n.folds
-set.seed(1) #for reproducibility.
-fold.vec <- sample(rep(unique.folds, l=N))
-min.x <- -3
-max.x <- 3
-x <- runif(N, min.x, max.x)
 sim.data.list <- list()
-for(pattern in names(true.f.list)){
-  true.f <- true.f.list[[pattern]]
+csv.vec <- Sys.glob("data_*.csv")
+for(csv in csv.vec){
+  pattern <- gsub("data_|.csv", "", csv)
+  sim.dt <-  data.table::fread(csv)
   set.seed(1)
-  y <- true.f(x) + rnorm(N, 0, 2)
+  fold.vec <- sample(rep(unique.folds, l=nrow(sim.dt)))
   sim.data.list[[pattern]] <- data.table(
-    pattern, x, y, fold=factor(fold.vec))
+    pattern, sim.dt, fold=factor(fold.vec))
 }
 sim.data <- do.call(rbind, sim.data.list)
-test.fold <- 1
-sim.data[, set := ifelse(fold==test.fold, "validation", "subtrain")]
+
+validation.fold <- 1
+sim.data[, set := ifelse(fold==validation.fold, "validation", "subtrain")]
 sim.data[, folds := ifelse(
-  fold==test.fold,
-  test.fold,
-  paste(unique.folds[-test.fold], collapse=","))]
+  fold==validation.fold,
+  validation.fold,
+  paste(unique.folds[-validation.fold], collapse=","))]
 sim.gg <- ggplot()+
   theme_bw()+
   theme(panel.spacing=grid::unit(0, "lines"))+
@@ -79,7 +71,7 @@ nnet.pred.dt.list <- list()
 nnet.loss.dt.list <- list()
 hidden.units.vec <- c(0, 10, 200)
 maxit.vec <- 10^seq(0, 4)
-for(pattern in names(true.f.list)){
+for(pattern in unique(sim.data$pattern)){
   select.pattern <- data.table(pattern)
   pattern.data <- sim.data[select.pattern, on="pattern"]
   set.data <- list()
@@ -101,12 +93,12 @@ for(pattern in names(true.f.list)){
         skip=skip,
         linout=TRUE,
         maxit=maxit)
-      pred.x <- sort(c(x, seq(min.x, max.x, l=200)))
+      pred.x <- sort(c(sim.data$x, seq(min(sim.data$x), max(sim.data$x), l=200)))
       nnet.pred.dt.list[[paste(pattern, hidden.units, maxit)]] <- data.table(
         pattern, hidden.units, maxit,
         x=pred.x,
         pred.y=as.numeric(predict(fit, data.frame(x=pred.x))))
-      pattern.data[, pred.y := as.numeric(predict(fit, pattern.data$x))]
+      pattern.data[, pred.y := as.numeric(predict(fit, pattern.data))]
       nnet.loss.dt.list[[paste(pattern, hidden.units, maxit)]] <- data.table(
         pattern, hidden.units, maxit,
         pattern.data[, .(mse=mean((pred.y-y)^2)), by=set])
@@ -145,8 +137,8 @@ ggplot()+
   theme(panel.spacing=grid::unit(0, "lines"))+
   facet_grid(pattern ~ ., labeller=label_both, scales="free")
 
-slides.list <- list()
 for(units in c(10, 0, 200)){
+  slides.list <- list()
   for(it in maxit.vec){
     gg <- sets.gg+
       ggtitle(paste(
@@ -194,11 +186,11 @@ for(units in c(10, 0, 200)){
   print(gg.units)
   dev.off()
   slides.list[[length(slides.list)+1]] <- out.png
-}
-
-slides.vec <- sprintf("
+  slides.vec <- sprintf("
 \\begin{frame}
   \\includegraphics[width=\\textwidth]{%s}
 \\end{frame}
 ", slides.list)
-writeLines(slides.vec, "figure-overfitting.tex")
+  writeLines(slides.vec, sprintf("figure-overfitting-%d.tex", units))
+}
+
