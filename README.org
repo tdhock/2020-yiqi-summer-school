@@ -1,3 +1,19 @@
+Tutorial: introduction to machine learning and neural networks
+
+** 8 July 2020
+
+[[file:slides.tex]] makes [[file:slides.pdf]] 
+
+[[file:figure-overfitting.R]] makes various figures that demonstrate overfitting, e.g.
+
+[[file:figure-overfitting-pred-units=200-maxit=1.png]]
+
+[[file:figure-overfitting-pred-units=200-maxit=10.png]]
+
+[[file:figure-overfitting-pred-units=200-maxit=10000.png]]
+
+[[file:figure-overfitting-data-loss-200.png]]
+
 ** 4 July 2020
 
 [[file:figure-test-accuracy-data.R]] makes
