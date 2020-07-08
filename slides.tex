@@ -309,51 +309,234 @@ f(\includegraphics[width=0.5\textwidth]{retinal-scans/national-geographic-medici
   \end{itemize}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Creating/reading CSV data tables}
+\begin{frame}[fragile]
+  \frametitle{CSV data tables for machine learning}
   \begin{itemize}
   \item One row for each observation.
-  \item One column for the output/label (in regression the label is a real
+  \item One column for the output/label/y (in regression the label is a real
     number, in classification the label is a class/category).
-  \item The other columns should be inputs/features that will be used
-    to predict the corresponding output/label.
+  \item The other columns should be inputs/features/X that will be used
+    to predict the corresponding output/label/y.
   \end{itemize}
 
-  Examples:
+  Example:
+  \url{https://raw.githubusercontent.com/tdhock/2020-yiqi-summer-school/master/data_linear.csv}
+
+\begin{verbatim}
+               x            y
+  1: -1.40694802  0.933196336
+  2: -0.76725660  3.832773444
+  3:  0.43712018  4.202983135
+  4:  2.44924674 13.089055084
+...
+\end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile,fragile]
+  \frametitle{Download CSV data and get file names into R}
+
+  Download a copy of the github repo to get these data sets
+  \url{https://github.com/tdhock/2020-yiqi-summer-school/archive/master.zip}
+
+Set working directory to the downloaded repo:
+
+\begin{verbatim}
+> setwd("~/teaching/2020-yiqi-summer-school")
+> getwd()
+[1] "/home/tdhock/teaching/2020-yiqi-summer-school"
+\end{verbatim}
+
+  Get a character vector of CSV data file names:
+  
+\begin{verbatim}
+> csv.vec <- Sys.glob("data_*.csv")
+> csv.vec
+[1] "data_linear.csv"    "data_quadratic.csv"
+[3] "data_sin.csv"      
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile,fragile]
+  \frametitle{Read each CSV data file into R}
+\begin{verbatim}
+sim.data.list <- list()
+for(csv in csv.vec){
+  pattern <- gsub("data_|.csv", "", csv)
+  sim.dt <-  data.table::fread(csv)
+  set.seed(1) # for reproducibility.
+  fold.vec <- sample(rep(1:4, l=nrow(sim.dt)))
+  sim.data.list[[pattern]] <- data.table::data.table(
+    pattern, sim.dt, fold=factor(fold.vec))
+} # combine into a single data table:
+sim.data <- do.call(rbind, sim.data.list)
+\end{verbatim}
+
   \begin{itemize}
-  \item TODO
+  \item \texttt{gsub} removes prefix/suffix from CSV file name.
+  \item \texttt{data.table::fread} gets CSV data from file into R.
+  \item \texttt{set.seed} used to get consistent/reproducible results from the
+    pseudo-random number generator (\texttt{sample}).
+  \item \texttt{data.table::fun} means use \texttt{fun} from
+    \texttt{data.table} package, install it via
+    \texttt{install.packages("data.table")}
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{K-fold cross-validation for evaluating prediction accuracy}
-  Randomly create a vector of fold ID numbers from 1 to K, one fold ID
-  for each observation:
+  \frametitle{Result of reading CSV data into R}
+  Result is:
 
 \begin{verbatim}
-set.seed(1) #for reproducibility.
-n.folds <- 4
-unique.folds <- 1:n.folds
-fold.vec <- sample(rep(unique.folds, l=N.observations))
-\end{verbatim}
-
-  The results:
-
-\begin{verbatim}
-> unique.folds
-[1] 1 2 3 4
-> str(fold.vec)
- int [1:100] 4 3 1 2 3 3 2 2 3 3 ...
+> sim.data
+     pattern          x          y fold
+  1:  linear -1.4069480  0.9331963    4
+  2:  linear -0.7672566  3.8327734    3
+  3:  linear  0.4371202  4.2029831    1
+  4:  linear  2.4492467 13.0890551    2
+  5:  linear -1.7899084  2.0791987    3
+ ---                                   
+296:     sin  1.7838530  4.0502991    1
+297:     sin -0.2683533 -0.1097264    1
+298:     sin -0.5394955 -0.5539398    1
+299:     sin  1.8652215 -0.2262517    4
+300:     sin  0.6295997  8.8124249    4
 \end{verbatim}
   
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Assign each observation to subtrain/validation set}
+
+\begin{verbatim}
+validation.fold <- 1
+sim.data[, set := ifelse(
+  fold==validation.fold, "validation", "subtrain")]
+> sim.data
+     pattern          x          y fold        set
+  1:  linear -1.4069480  0.9331963    4   subtrain
+  2:  linear -0.7672566  3.8327734    3   subtrain
+  3:  linear  0.4371202  4.2029831    1 validation
+  4:  linear  2.4492467 13.0890551    2   subtrain
+  5:  linear -1.7899084  2.0791987    3   subtrain
+ ---                                              
+296:     sin  1.7838530  4.0502991    1 validation
+297:     sin -0.2683533 -0.1097264    1 validation
+298:     sin -0.5394955 -0.5539398    1 validation
+299:     sin  1.8652215 -0.2262517    4   subtrain
+300:     sin  0.6295997  8.8124249    4   subtrain
+\end{verbatim}
+  
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Neural network with one hidden layer, 20 hidden units}
+
+  Use for loops to fit different neural network models for each data
+  set and number of iterations. 
+
+\begin{verbatim}
+maxit.values <- 10^seq(0, 4)
+pattern.values <- c("linear", "quadratic", "sin")
+for(i in maxit.values)for(p in pattern.values){
+  pattern.data <- sim.data[pattern==p]
+  fit <- nnet::nnet(
+    y ~ x,
+    pattern.data[set=="subtrain"],
+    size=20,     #hidden units
+    linout=TRUE, #for regression
+    maxit=i)     #max number of iterations
+...
+\end{verbatim}
+
+\end{frame}
+
+\input{figure-overfitting-20}
+
 \begin{frame}
-  \frametitle{Hyper-parameter tuning}
-  Fix a hyper-parameter value and use the
-    subtrain data to fit use the subtrain data to learn a model for
-    each of hyper-parameters, then use the hyper-parameters that
-    result in maximal prediction accuracy with respect to the .
+  \frametitle{Overfitting}
+  \begin{itemize}
+  \item Happens when subtrain error/loss decreases but validation error
+    increases (as a function of some hyper-parameter)
+  \item Here the hyper-parameter is the number of iterations of
+    gradient descent, and overfitting starts after 10--100 iterations.
+  \item To maximize prediction accuracy you need to choose a
+    hyper-parameter with minimal validation error/loss.
+  \item This optimal hyper-parameter will depend on the data set.
+  \item In this case that means choosing 10 iterations for the linear
+    data set, and 100 iterations for the quadratic/sin data sets.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Computing subtrain/validation loss curves}
+
+\begin{verbatim}
+...
+  pattern.data[, pred.y := as.numeric(predict(fit, pattern.data))]
+  nnet.loss.dt.list[[paste(pattern, maxit)]] <- data.table(
+    pattern=p, maxit=i, pattern.data[, .(
+      mse=mean((pred.y-y)^2)), by=set])
+}
+nnet.loss.dt <- do.call(rbind, nnet.loss.dt.list)
+\end{verbatim}
+  
+\begin{verbatim}
+      pattern        set maxit         mse
+ 1:    linear   subtrain     1  17.7785881
+ 2:    linear validation     1  23.0575528
+...
+29:       sin   subtrain 10000   0.6970455
+30:       sin validation 10000  19.5051785
+\end{verbatim}
+\end{frame}
+
+\input{figure-overfitting-2}
+
+\begin{frame}[fragile]
+  \frametitle{How does the neural network predict/learn?}
+
+  \begin{eqnarray*}
+    \text{hidden units: }\ h_j &=& \sigma(w_j x + b_j) \\
+    \text{predicted output: }\  \texttt{o} = \hat y &=& \sum_{j=1}^u v_j h_j + \beta
+  \end{eqnarray*}
+
+  \begin{itemize}
+  \item $x\in\mathbb R$ is the input/feature (\texttt{i1} in R notation below).
+  \item $\sigma:\mathbb R\rightarrow [0,1]$ is the sigmoid activation
+    function, $\sigma(z)=(1+e^{-z})^{-1}$.
+  \item $h_j\in[0,1]$ are $u$ hidden units, e.g. $u\in\{20, 2\}$ (\texttt{h1},\texttt{h2}).
+  \item $w_j,b_j,v_j,\beta\in\mathbb R$ are the weights which are
+    learned using gradient descent to minimize the squared error, e.g. for $u=2$:
+  \end{itemize}
+
+\begin{verbatim}
+> coef(fit)
+     b->h1     i1->h1      b->h2     i1->h2 
+-40.770433  -2.636863 -20.719333   2.629485 
+      b->o      h1->o      h2->o 
+  4.643852  18.973225  28.348342 
+\end{verbatim}
+\end{frame}
+
+
+\input{figure-overfitting-200}
+
+\begin{frame}
+  \frametitle{Comments on other model sizes}
+  \begin{itemize}
+  \item Model with 2 hidden units is less flexible: does not fit the subtrain
+    data as well, and does not overfit as much.
+  \item Model with 200 hidden units is more flexible: fits subtrain
+    data even better, and overfits even more.
+  \item Therefore model size / number of hidden units is also a
+    hyper-parameter that can be used to control overfitting.
+  \item R code is the same, just use \texttt{size=2} or 200 (or even
+    better, I wrote a for loop over size values).
+  \item Conclusion: you need to use a held-out validation set to
+    choose the best values of hyper-parameters (e.g. number of
+    iterations, hidden units).
+  \end{itemize}
 \end{frame}
 
 % QUIZ 1. purpose of train/subtrain/validation/test
@@ -361,33 +544,29 @@ fold.vec <- sample(rep(unique.folds, l=N.observations))
 % ML. 4. cross-validation fold ID / test/train sets.
 
 
-
-\begin{frame}[fragile]
-  \frametitle{Neural network with one hidden layer, 10 hidden units}
-
-\begin{verbatim}
-for(maxit in c(1, 10, 100, 1000, 10000)){
-  fit <- nnet::nnet(
-    y ~ x,
-    set.data$subtrain,
-    size=10,     #hidden units
-    skip=FALSE,  #no units which skip the hidden layer
-    linout=TRUE, #for regression
-    maxit=maxit) #max number of iterations
-\end{verbatim}
-
-\end{frame}
-
-\input{figure-overfitting-10}
-
-\input{figure-overfitting-0}
-
-\input{figure-overfitting-200}
-
 \section{Classifying images of digits}
 
 \begin{frame}
-  \includegraphics[width=\textwidth]{figure-validation-loss-digits}
+  \frametitle{Image classification}
+  \begin{itemize}
+  \item One of the most popular/successful applications of machine
+    learning.
+  \item Input: image file $x\in\mathbb R^{h\times w\times c}$ where
+    $h$ is the height in pixels, $w$ is the width, $c$ is the number
+    of channels, e.g. RGB image $c=3$ channels.
+  \item In this tutorial we use images with $h=w=16$ pixels and $c=1$
+    channel (grayscale).
+  \item Output: class/category $y$ (from a finite set).
+  \item In this tutorial there are ten image classes $y\in\{0, 1, \dots, 9\}$, one for each
+    digit.
+  \item Want to learn $f$ such that
+    $f(\includegraphics[height=1cm]{mnist-0})=0$,
+    $f(\includegraphics[height=1cm]{mnist-1})=1$, etc.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \includegraphics[height=\textheight]{figure-validation-loss-digits}
 \end{frame}
 
 \begin{frame}[fragile]

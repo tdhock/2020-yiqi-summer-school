@@ -37,7 +37,7 @@ gg.digits <- ggplot()+
   coord_equal()+
   theme_bw()+
   theme(panel.spacing=grid::unit(0, "lines"))+
-  scale_fill_gradient(low="white", high="black")
+  scale_fill_gradient(low="black", high="white")
 png("figure-validation-loss-digits.png",
     width=5.5, height=5, units="in", res=200)
 print(gg.digits)

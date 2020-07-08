@@ -69,7 +69,7 @@ dev.off()
 
 nnet.pred.dt.list <- list()
 nnet.loss.dt.list <- list()
-hidden.units.vec <- c(0, 10, 200)
+hidden.units.vec <- c(2, 20, 200)
 maxit.vec <- 10^seq(0, 4)
 for(pattern in unique(sim.data$pattern)){
   select.pattern <- data.table(pattern)
@@ -86,6 +86,7 @@ for(pattern in unique(sim.data$pattern)){
     }
     for(maxit in maxit.vec){
       cat(paste(pattern, hidden.units, maxit, "\n"))
+      set.seed(1)
       fit <- nnet::nnet(
         y ~ x,
         set.data$subtrain,
@@ -137,7 +138,7 @@ ggplot()+
   theme(panel.spacing=grid::unit(0, "lines"))+
   facet_grid(pattern ~ ., labeller=label_both, scales="free")
 
-for(units in c(10, 0, 200)){
+for(units in hidden.units.vec){
   slides.list <- list()
   for(it in maxit.vec){
     gg <- sets.gg+
@@ -193,4 +194,5 @@ for(units in c(10, 0, 200)){
 ", slides.list)
   writeLines(slides.vec, sprintf("figure-overfitting-%d.tex", units))
 }
+
 
