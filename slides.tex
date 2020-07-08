@@ -555,13 +555,15 @@ nnet.loss.dt <- do.call(rbind, nnet.loss.dt.list)
     $h$ is the height in pixels, $w$ is the width, $c$ is the number
     of channels, e.g. RGB image $c=3$ channels.
   \item In this tutorial we use images with $h=w=16$ pixels and $c=1$
-    channel (grayscale).
+    channel (grayscale, smaller values are darker).
   \item Output: class/category $y$ (from a finite set).
   \item In this tutorial there are ten image classes $y\in\{0, 1, \dots, 9\}$, one for each
     digit.
   \item Want to learn $f$ such that
     $f(\includegraphics[height=1cm]{mnist-0})=0$,
     $f(\includegraphics[height=1cm]{mnist-1})=1$, etc.
+  \item Code for figures in this section:
+    \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-validation-loss.R}
   \end{itemize}
 \end{frame}
 
@@ -574,7 +576,7 @@ nnet.loss.dt <- do.call(rbind, nnet.loss.dt.list)
 
   \begin{itemize}
   \item Each image is one row.
-  \item First row is output/label/class to predict.
+  \item First column is output/label/class to predict.
   \item Other 256 columns are pixel intensity values.
   \end{itemize}
 
@@ -646,14 +648,71 @@ Need to specify dimensions of array:
 
 \begin{verbatim}
 library(keras)
-linear.model <- keras_model_sequential() %>%
-  layer_flatten(
-    input_shape = dim(zip.X.array)[-1]) %>%
-  layer_dense(
-    units = ncol(zip.y.mat),
+linear.model <- keras::keras_model_sequential() %>%
+  keras::layer_flatten(
+    input_shape = c(16, 16, 1)) %>%
+  keras::layer_dense(
+    units = 10,
     activation = 'softmax')
 \end{verbatim}
 
+  \begin{itemize}
+  \item First layer must specify shape of inputs (here 16x16x1).
+  \item \texttt{layer\_flatten} converts any shape to a single dimension
+    of units (here 256).
+  \item \texttt{layer\_dense} uses all units in the previous layer to
+    predict each unit in the layer.
+  \item \texttt{units=10} because there are ten possible classes for an output.
+  \item \texttt{activation='softmax'} is required for the last/output layer in
+    multi-class classification problems.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Keras model compilation}
+\begin{verbatim}
+linear.model %>% keras::compile(
+  loss = keras::loss_categorical_crossentropy,
+  optimizer = keras::optimizer_adadelta(),
+  metrics = c('accuracy')
+)
+\end{verbatim}
+In \texttt{compile} you can specify
+\begin{itemize}
+\item a \texttt{loss} function, which is directly optimized/minimized
+  in each iteration of the gradient descent learning algorithm. 
+  \url{https://keras.io/api/losses/} 
+\item an \texttt{optimizer}, which is the version of gradient descent
+  learning algorithm to use. 
+  \url{https://keras.io/api/optimizers/} 
+\item an evaluation \texttt{metric} to monitor, not directly optimized
+  via gradient descent, but usually more relevant/interpretable for
+  the application (e.g. accuracy is the proportion of correctly
+  predicted labels). \url{https://keras.io/api/metrics/} 
+\end{itemize}
+\end{frame}
+ 
+\begin{frame}[fragile]
+\frametitle{Keras model fitting}
+\begin{verbatim}
+linear.model %>% keras::fit(
+  zip.X.array, zip.y.mat,
+  epochs = 50,
+  validation_split = 0.2
+)
+\end{verbatim}
+In \texttt{fit} you can specify
+\begin{itemize}
+\item Train data inputs \texttt{zip.X.array} and outputs
+  \texttt{zip.y.mat} (required).
+\item Number of full passes of gradient descent through the subtrain
+  data (\texttt{epochs}). In each epoch the gradient with respect to
+  each subtrain observation is computed once.
+\item \texttt{validation\_split=0.2} which means to use 80\% subtrain
+  (used for gradient descent parameter updates), 20\% validation (used
+  for hyper-parameter selection). 
+\end{itemize}
 \end{frame}
  
 \begin{frame}
@@ -661,7 +720,7 @@ linear.model <- keras_model_sequential() %>%
 \end{frame}
  
 \begin{frame}[fragile]
-  \frametitle{Convolutional model R code}
+  \frametitle{Sparse (convolutional) model R code}
 
 \begin{verbatim}
 library(keras)
@@ -678,6 +737,13 @@ conv.model <- keras_model_sequential() %>%
     units = ncol(zip.y.mat), 
     activation = 'softmax')
 \end{verbatim}
+
+  \begin{itemize}
+  \item Sparse: few inputs are used to predict each unit in
+    \texttt{layer\_conv\_2d}.
+  \item Exploits structure of image data to make learning
+    easier/faster.
+  \end{itemize}
 
 \end{frame}
  
@@ -715,13 +781,61 @@ dense.model <- keras_model_sequential() %>%
 \begin{frame}
   \includegraphics[width=\textwidth]{figure-validation-loss-three}
 \end{frame}
- 
+
 \begin{frame}
-  \includegraphics[width=\textwidth]{figure-test-accuracy-baseline}
+  \frametitle{4-fold cross-validation for model evaluation}
+  Does the convolutional model provide more accurate predictions on
+  unseen test data? First randomly assign a fold ID to each image/observation,
+  then for each test fold ID from 1 to 4:
+  \begin{itemize}
+  \item Hold out the images/observations with the test fold ID as a
+    test set (not used at all for model training).
+  \item Use the other images/observations to train all three models
+    using \texttt{validation\_split=0.2}.
+  \item Plot the validation loss curve as a function of the number of
+    epochs, and select the number of epochs which minimizes the
+    validation loss (hyper-parameter learning).
+  \item Re-train with \texttt{epochs=}the learned number of epochs and
+    \texttt{validation\_split=0} (all train data used for gradient
+    descent parameter updates).
+  \item Finally compute the prediction accuracy with respect to the
+    held-out test set.
+  \end{itemize}
+  Plot accuracy values (or mean/sd) after learning/testing four times
+  (one for each test fold).
 \end{frame}
  
 \begin{frame}
+  \frametitle{Accuracy rates for each test fold}
+  \includegraphics[width=\textwidth]{figure-test-accuracy-baseline}
+
+  \begin{itemize}
+  \item Always a good idea to compare with the trivial baseline model which always
+    predicts the most frequent class in the train set. (ignoring all
+    inputs/features) 
+  \item Here we see that the baseline is much less accurate than the
+    three learned models, so they are clearly learning something non-trivial.
+  \item Code for test accuracy figures:
+    \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-test-accuracy.R}
+  \end{itemize}
+\end{frame}
+ 
+\begin{frame}
+  \frametitle{Zoom to learned models}
   \includegraphics[width=\textwidth]{figure-test-accuracy}
+  \begin{itemize}
+  \item Dense neural network slightly more accurate
+    than linear model, convoluational significantly more
+    accurate than others.
+  \item Conclusion: convolutional neural network should be preferred
+    for most accurate predictions in these data.
+  \item Maybe not the same conclusion in other data sets, with the
+    same models. (always need to do cross-validation experiments to
+    see which model is best in any given data set)
+  \item Maybe other models/algorithms would be even more accurate in
+    these data. (more/less layers, more/less units, completely
+    different algorithm such as random forests, boosting, etc)
+  \end{itemize}
 \end{frame}
  
 \end{document}
