@@ -473,12 +473,13 @@ for(i in maxit.values)for(p in pattern.values){
 
 \begin{verbatim}
 ...
-  pattern.data[, pred.y := as.numeric(predict(fit, pattern.data))]
-  nnet.loss.dt.list[[paste(pattern, maxit)]] <- data.table(
+  pattern.data[, pred.y := as.numeric(predict(
+    fit, pattern.data))]
+  loss.dt.list[[paste(pattern, maxit)]] <- data.table(
     pattern=p, maxit=i, pattern.data[, .(
       mse=mean((pred.y-y)^2)), by=set])
 }
-nnet.loss.dt <- do.call(rbind, nnet.loss.dt.list)
+loss.dt <- do.call(rbind, loss.dt.list)
 \end{verbatim}
   
 \begin{verbatim}
@@ -575,9 +576,10 @@ nnet.loss.dt <- do.call(rbind, nnet.loss.dt.list)
   \frametitle{Representation of digits in CSV}
 
   \begin{itemize}
-  \item Each image is one row.
+  \item Each image/observation is one row.
   \item First column is output/label/class to predict.
-  \item Other 256 columns are pixel intensity values.
+  \item Other 256 columns are inputs/features (pixel intensity
+    values).
   \end{itemize}
 
 \begin{verbatim}

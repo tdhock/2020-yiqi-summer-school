@@ -1,5 +1,62 @@
 Tutorial: introduction to machine learning and neural networks
 
+Main tutorial:
+- [[https://github.com/tdhock/2020-yiqi-summer-school/raw/master/slides.pdf][Slides PDF]]
+- Lecture 1: [[https://www.youtube.com/watch?v=9Lb-a5GT4vQ&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=2&t=0s][Introduction to machine learning and selected applications]]
+  - a supervised learning algorithm will input a labeled
+    training data set, and output what?
+  - what are three advantages of supervised machine
+    learning, relative to classical programming techniques?
+- Lecture 2: [[https://www.youtube.com/watch?v=8DoeROToJ8U&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=3&t=0s][Demonstrating overfitting in regression, introduction to R programming]]
+  - when splitting data into train/test sets, what is the purpose of the train set?
+  - when splitting data into train/test sets, what is the purpose of the test set?
+  - when splitting a train set into subtrain/validation
+    sets, what is the purpose of the subtrain set?
+  - when splitting a train set into subtrain/validation
+    sets, what is the purpose of the validation set?
+  - The goal of supervised machine learning is to get a function that
+    yields highly accurate predictions with respect to what data?
+  - How can you tell if machine learning model predictions are
+    overfitting?
+  - In 4-fold cross-validation, we randomly assign each observation a fold ID
+    in what range of values?
+  - In 4-fold cross-validation for subtrain/validation splits, if the
+    validation fold ID is 3, then what observations are used as the
+    subtrain set?
+  - Machine learning data sets are usually stored in CSV data files,
+    where rows are ___ and columns are ___ and ___ ?
+  - When using the nnet::nnet function in R to learn a neural network
+    with a single hidden layer, what data set
+    (all/train/test/subtrain/validation) should you pass as the second
+    argument?
+  - When using the nnet::nnet function in R to learn a neural network
+    with a single hidden layer, do LARGE or SMALL values of the maxit
+    hyper-parameter result in overfitting?
+  - When using the nnet::nnet function in R to learn a neural network
+    with a single hidden layer, do LARGE or SMALL values of the size
+    hyper-parameter result in overfitting?
+- Lecture 3: [[https://www.youtube.com/watch?v=I0DBo7RNBlI&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=4&t=0s][Intro to neural networks for image classification using R/keras]]
+  - In multi-class classification problems with keras in R, the
+    output/label data must be stored in what data structure?
+  - To use image data as inputs, you need to use what data structure?
+  - When using the keras::fit function, what data set
+    (all/train/test/subtrain/validation) should you pass as the first
+    two arguments?
+  - Using keras::fit with validation_split=0.3 implies what percents
+    of data allocated to subtrain and validation sets?
+  - When using 4-fold cross-validation for model evaluation, the test
+    set is used for what?
+  - To determine if classification models have learned any non-trivial
+    patterns in the data, they should be compared with a baseline
+    which ignores all inputs/features and always predicts what value?
+
+Supplementary youtube screencasts showing R command line use:
+- [[https://www.youtube.com/playlist?list=PLwc48KSH3D1M78ilQi35KPe2GHa7B_Rme][Machine learning and data visualization basics]]
+- [[https://www.youtube.com/playlist?list=PLwc48KSH3D1PYdSd_27USy-WFAHJIfQTK][Basic neural networks (R keras)]]
+- [[https://www.youtube.com/playlist?list=PLwc48KSH3D1MvTf_JOI00_eIPcoeYMM_o][Number of hidden units is a regularization parameter (R keras)]]
+- [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
+
+
 ** 8 July 2020
 
 [[file:slides.tex]] makes [[file:slides.pdf]] 
