@@ -1,6 +1,7 @@
 Tutorial: introduction to machine learning and neural networks
 
-Main tutorial:
+** Main tutorial
+
 - [[https://github.com/tdhock/2020-yiqi-summer-school/raw/master/slides.pdf][Slides PDF]]
 - Lecture 1: [[https://www.youtube.com/watch?v=9Lb-a5GT4vQ&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=2&t=0s][Introduction to machine learning and selected applications]]
   - a supervised learning algorithm will input a labeled
