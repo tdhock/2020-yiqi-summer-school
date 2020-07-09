@@ -1,93 +1,73 @@
-Tutorial: introduction to machine learning and neural networks
+Quiz questions for each lecture:
 
-Prepared for the summer school, [[http://www2.nau.edu/luo-lab/?workshop][New Advances in Land Carbon Cycle
-Modeling (3rd year, 2020)]].
-
-** Tutorial lectures and questions
-
-- [[https://github.com/tdhock/2020-yiqi-summer-school/raw/master/slides.pdf][Slides PDF]]
-- Lecture 1: [[https://www.youtube.com/watch?v=9Lb-a5GT4vQ&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=2&t=0s][Introduction to machine learning and selected applications]]
+- Lecture 1: Introduction to machine learning and selected applications, https://www.youtube.com/watch?v=9Lb-a5GT4vQ&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=2&t=0s
   - a supervised learning algorithm will input a labeled
     training data set, and output what?
+    ANSWER: a function for predicting labels/outputs given features/inputs.
   - what are three advantages of supervised machine
     learning, relative to classical programming techniques?
-- Lecture 2: [[https://www.youtube.com/watch?v=8DoeROToJ8U&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=3&t=0s][Demonstrating overfitting in regression, introduction to R programming]]
+    ANSWER: 1. state-of-the-art accuracy with enough data
+    2. programmer does not need domain knowledge
+    3. pattern encoded in data/labels
+- Lecture 2: Demonstrating overfitting in regression, introduction to R programming, https://www.youtube.com/watch?v=8DoeROToJ8U&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=3&t=0s
   - when splitting data into train/test sets, what is the purpose of the train set?
+    ANSWER: used to find/optimize model parameters to
+    maximize prediction accuracy / minimize loss/error.
   - when splitting data into train/test sets, what is the purpose of the test set?
+    ANSWER: used to evaluate prediction accuracy of learned models.
   - when splitting a train set into subtrain/validation
     sets, what is the purpose of the subtrain set?
+    ANSWER: used in learning algorithm such as gradient descent,
+    which directly minimizes the subtrain set loss/error.
   - when splitting a train set into subtrain/validation
     sets, what is the purpose of the validation set?
+    ANSWER: used to learn hyper-parameters to avoid overfitting.
   - The goal of supervised machine learning is to get a function that
     yields highly accurate predictions with respect to what data?
+    ANSWER: new/unseen/test data.
   - How can you tell if machine learning model predictions are
     overfitting?
+    ANSWER: accuracy is high on train/subtrain set but low on test/validation set.
   - In 4-fold cross-validation, we randomly assign each observation a fold ID
     in what range of values?
+    ANSWER: from 1 to 4, {1, 2, 3, 4}.
   - In 4-fold cross-validation for subtrain/validation splits, if the
     validation fold ID is 3, then what observations are used as the
     subtrain set?
+    ANSWER: all observations which were assigned another fold ID (1,2,4).
   - Machine learning data sets are usually stored in CSV data files,
-    where rows are ___ and columns are ___ and ___ ?
+    where rows are OBSERVATIONS and columns are INPUTS/FEATURES and OUTPUT/LABEL.
   - When using the nnet::nnet function in R to learn a neural network
     with a single hidden layer, what data set
     (all/train/test/subtrain/validation) should you pass as the second
     argument?
+    ANSWER: subtrain.
   - When using the nnet::nnet function in R to learn a neural network
     with a single hidden layer, do LARGE or SMALL values of the maxit
     hyper-parameter result in overfitting?
+    ANSWER: LARGE.
   - When using the nnet::nnet function in R to learn a neural network
     with a single hidden layer, do LARGE or SMALL values of the size
     hyper-parameter result in overfitting?
-- Lecture 3: [[https://www.youtube.com/watch?v=I0DBo7RNBlI&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=4&t=0s][Intro to neural networks for image classification using R/keras]]
+    ANSWER: LARGE.
+- Lecture 3: Intro to neural networks for image classification using R/keras, https://www.youtube.com/watch?v=I0DBo7RNBlI&list=PLwc48KSH3D1NBixIvVYPXJ1GPtA9RAA8K&index=4&t=0s
   - In multi-class classification problems with keras in R, the
     output/label data must be stored in what data structure?
+    ANSWER: binary matrix (one-hot encoding, rows=observations, columns=classes).
   - To use image data as inputs, you need to use what data structure?
+    ANSWER: 4-dimensional array (observations, pixels high, pixels wide, channels).
   - When using the keras::fit function, what data set
     (all/train/test/subtrain/validation) should you pass as the first
     two arguments?
+    ANSWER: train.
   - Using keras::fit with validation_split=0.3 implies what percents
     of data allocated to subtrain and validation sets?
+    ANSWER: 70% subtrain, 30% validation.
   - When using 4-fold cross-validation for model evaluation, the test
     set is used for what?
+    ANSWER: it is only used after having fully trained models
+    (including hyper-parameters), in order to evaluate prediction accuracy.
   - To determine if classification models have learned any non-trivial
     patterns in the data, they should be compared with a baseline
     which ignores all inputs/features and always predicts what value?
-
-Supplementary youtube screencasts showing R command line use:
-- [[https://www.youtube.com/playlist?list=PLwc48KSH3D1M78ilQi35KPe2GHa7B_Rme][Machine learning and data visualization basics]]
-- [[https://www.youtube.com/playlist?list=PLwc48KSH3D1PYdSd_27USy-WFAHJIfQTK][Basic neural networks (R keras)]]
-- [[https://www.youtube.com/playlist?list=PLwc48KSH3D1MvTf_JOI00_eIPcoeYMM_o][Number of hidden units is a regularization parameter (R keras)]]
-- [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
-
-** 8 July 2020
-
-[[file:slides.tex]] makes [[file:slides.pdf]] 
-
-[[file:figure-overfitting.R]] makes various figures that demonstrate overfitting, e.g.
-
-[[file:figure-overfitting-pred-units=200-maxit=1.png]]
-
-[[file:figure-overfitting-pred-units=200-maxit=10.png]]
-
-[[file:figure-overfitting-pred-units=200-maxit=10000.png]]
-
-[[file:figure-overfitting-data-loss-200.png]]
-
-** 4 July 2020
-
-[[file:figure-test-accuracy-data.R]] makes
-[[file:figure-test-accuracy-data.rds]] (4-fold cross-validation estimation
-of test error using three keras neural network models).
-
-[[file:figure-test-accuracy.R]] plot the test accuracy in 4-fold
-cross-validation
-
-[[file:figure-test-accuracy-baseline.png]]
-
-[[file:figure-test-accuracy.png]]
-
-[[file:download.R]] downloads data sets.
-
-[[file:figure-validation-loss.R]] plots subtrain/validation loss for
-three neural network models.
+    ANSWER: the most frequent label in the train set.

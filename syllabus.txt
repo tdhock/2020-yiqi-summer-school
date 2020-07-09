@@ -1,0 +1,23 @@
+Syllabus, topics covered in "Introduction to machine learning and
+neural networks" by Toby Dylan Hocking, July 2020.
+
+Definition, purpose, and advantages of supervised learning.
+
+Applications of supervised learning to text/image data, classification
+and regression.
+
+K-Fold Cross-Validation for data splitting, and the purpose of
+train/test/subtrain/validation sets during machine learning model
+training and evaluation.
+
+How to detect and avoid overfitting.
+
+Storage of machine learning data sets in CSV files, and how to read
+them into R and convert them into data structures that can be used
+with R functions that implement machine learning algorithms.
+
+Training neural networks using R packages nnet and keras.
+
+Comparing prediction accuracy of learned models using test sets and
+K-fold cross-validation.
+
