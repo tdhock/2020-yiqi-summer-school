@@ -60,6 +60,19 @@ Supplementary youtube screencasts showing R command line use:
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1MvTf_JOI00_eIPcoeYMM_o][Number of hidden units is a regularization parameter (R keras)]]
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
 
+
+** 14 Aug 2020
+
+PRODA Data from Feng Tao downloaded from [[https://drive.google.com/drive/folders/17pQwskTu6Fa1q_O0Put5snaz9BdEe_XT?usp=sharing][Google Drive]].
+
+Based on [[file:Practice%20session/nau_training_proda/nn_clm_cen.py]] it seems that 
+- inputs [[file:Practice%20session/nau_training_proda/input_data/EnvInfo4NN_SoilGrids.mat]]
+- outputs [[file:Practice%20session/nau_training_proda/input_data/ParaMean_V8.4.mat]]
+
+[[file:figure-proda-inputs.R]] makes
+
+[[file:figure-proda-inputs.png]]
+
 ** 8 July 2020
 
 [[file:slides.tex]] makes [[file:slides.pdf]] 
