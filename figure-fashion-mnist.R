@@ -27,6 +27,7 @@ for(data.name in names(data.list)){
     for(observation in seq_along(obs.i.vec)){
       obs.i <- obs.i.vec[[observation]]
       intensity.mat <- test.list[["x"]][obs.i,,]
+      colnames(intensity.mat) <- rownames(intensity.mat) <- 1:nrow(intensity.mat)
       some.intensity.dt.list[[paste(label, observation)]] <- data.table(
         label, observation,
         row=as.integer(row(intensity.mat)),
@@ -49,7 +50,24 @@ for(data.name in names(data.list)){
     scale_y_reverse("Pixel row index", breaks=breaks.vec)+
     scale_x_continuous("Pixel column index", breaks=breaks.vec)
   png(paste0("figure-fashion-mnist-", data.name, ".png"),
-      width=7, height=5, res=100, units="in")
+      width=7, height=4.5, res=100, units="in")
   print(gg)
   dev.off()
 }
+
+one.breaks <- c(1, breaks.vec)
+gg <- ggplot()+
+  theme(
+    panel.border=element_rect(fill=NA, color="white", size=0.5),
+    panel.spacing=grid::unit(0, "lines"))+
+  coord_equal(expand=FALSE)+
+  geom_tile(aes(
+    col, row, fill=intensity),
+    data=some.intensity.dt.list[[length(some.intensity.dt.list)]])+
+  scale_fill_gradient(low="black", high="white")+
+  scale_y_reverse("Pixel row index", breaks=one.breaks)+
+  scale_x_continuous("Pixel column index", breaks=one.breaks)
+png("figure-fashion-mnist-one-example.png",
+    width=3, height=2.3, res=100, units="in")
+print(gg)
+dev.off()
