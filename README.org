@@ -61,6 +61,13 @@ Supplementary youtube screencasts showing R command line use:
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
 
 
+** 21 Oct 2020
+[[file:figure-fashion-mnist.R]] makes
+
+[[file:figure-fashion-mnist-fashion.png]] and
+
+[[file:figure-fashion-mnist-digits.png]]
+
 ** 14 Aug 2020
 
 PRODA Data from Feng Tao downloaded from [[https://drive.google.com/drive/folders/17pQwskTu6Fa1q_O0Put5snaz9BdEe_XT?usp=sharing][Google Drive]].
