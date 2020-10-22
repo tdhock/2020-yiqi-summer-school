@@ -26,15 +26,14 @@
 
 \author{
   Toby Dylan Hocking\\
-  toby.hocking@nau.edu\\
-  toby.hocking@r-project.org\\
+  toby.hocking@nau.edu
 }
 
 \maketitle
 
-\section{Introduction and applications}
+\section{Introduction and applications of machine learning}
 
- Machine learning intro: image classification example.
+Machine learning intro: image classification example.
   ML is all about learning predictive functions $f(x)\approx y$, where 
   \begin{itemize}
   \item Inputs/features $x$ can be easily computed using traditional
@@ -69,6 +68,9 @@
     \centering
     \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits}
     \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion}
+    % \\
+    % \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits-design}
+    % \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion-design} 
     \caption{Seven example images from each class/label in the original MNIST digits
       (left) and Fashion-MNIST (right) data sets. For each data set
       different label values from 0 to 9 appear are shown in panels
@@ -98,51 +100,58 @@ Say \textsc{Learn} is a learning algorithm you have coded.
 \begin{figure}
   \centering
   \includegraphics[width=0.8\textwidth]{drawing-mnist-train-test.pdf}
-  \caption{A learning algorithm inputs a train data set, and outputs a prediction function, f or g.}
+  \caption{A learning algorithm inputs a train data set, and outputs a
+    prediction function, f or g. Both f and g input a grayscale image
+    and output a class (integer from 0 to 9), but f is for  
+    digits and g is for fashion.}
   \label{fig:drawing-mnist-train-test}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.55\textwidth]{figure-overfitting-paper}
+  \includegraphics[width=0.4\textwidth]{figure-overfitting-paper-loss}   
+  \caption{Illustration of underfitting and overfitting in a neural
+    network regression model (single hidden layer, 50 hidden
+    units). \textbf{Left:} noisy data with a nonlinear sine wave
+    pattern (grey circles), learned functions (colored curves), and
+    residuals/errors (black line segments) are shown for three values
+    of epochs (panels from left to right) and two data subsets (panels
+    from top to bottom). \textbf{Right:} in each epoch the model
+    parameters are updated using gradient descent with respect to the
+    subtrain loss, which decreases with more epochs. The
+    optimal/minimum loss with respect to the validation set occurs at
+    64 epochs, indicating underfitting for smaller epochs (green
+    function, too regular/linear for both subtrain/validation sets)
+    and overfitting for larger epochs (purple function, very
+    irregular/nonlinear so good fit for subtrain but not validation
+    set).}
+  \label{fig:overfitting-paper}
 \end{figure}
 
 Machine learning for cell image classification (CellProfiler).
 Jones {\it et al.} PNAS 2009. Scoring diverse cellular morphologies in
 image-based screens with iterative feedback and machine learning.
-\parbox{2in}{
-\includegraphics[width=2in]{cellprofiler} 
-}
-\parbox{2in}{
 \begin{itemize}
-  \item Input $x$ = image of cell, 
+  \item Input $x$ = color image of cell, 
   \item Output $y\in\{\text{yes}, \text{no}\}$ (binary classification),
-  \item $f(\includegraphics[height=1cm]{cellprofiler-yes})=\text{yes}$,
-  \item $f(\includegraphics[height=1cm]{cellprofiler-no})=\text{no}$.
-  \end{itemize}
-}
-
-{Machine learning for image segmentation (LabelMe)}
-\includegraphics[width=\textwidth]{image-segmentation/labelme-interface}
+\end{itemize}
 
 {Machine learning for image segmentation}
-\includegraphics[width=\textwidth]{image-segmentation/labelme-examples}
-Russell {\it et al.} 2007.
+Russell {\it et al.} 2007. LabelMe paper.
 Q: What are the types/dimensions of $x,y,f$ in this example?
 
 {Machine learning for spam filtering (Gmail)}
-\includegraphics[height=2in]{spam-filtering/screenshot-gmail-spam}
-\includegraphics[height=2in]{spam-filtering/screenshot-inbox-message}
 Want: $f$(email message)$\in\{0,1\}$ -- binary classification, spam=1
 or not=0.
 
 {Machine learning for translation (google books)}
-\includegraphics[height=3in]{translation/monte-cristo-french-title}
-\includegraphics[height=3in]{translation/monte-cristo-english-title}
 
 {Machine learning for translation (google translate)}
-Want: $f$(\includegraphics[width=0.5\textwidth]{translation/monte-cristo-french}) =
-\includegraphics[width=0.8\textwidth]{translation/monte-cristo-english}
+Want: f(english)=french
 
 {Machine learning for medical diagnosis}
-\includegraphics[height=0.9\textheight]{retinal-scans/national-geographic-medicine-cover}
-f(\includegraphics[width=0.5\textwidth]{retinal-scans/national-geographic-medicine-retina})=
-\includegraphics[width=0.5\textwidth]{retinal-scans/national-geographic-medicine-paragraph}
+want: f(image) = blood pressure, heart attack or stroke risk
 
 \section{Demonstration of overfitting in regression /
   first steps with R}
@@ -183,20 +192,17 @@ any other problems you encounter in your work) you should
 \end{itemize}
 
 {Three different data sets/patterns}
-\includegraphics[width=\textwidth]{figure-overfitting-data}
 \begin{itemize}
 \item We illustrate this using a single input/feature
   $x\in\mathbb R$.
 \item We use a regression problem with outputs $y\in\mathbb R$.
 \item Goal is to learn a function $f(x)\in\mathbb R$.
-\end{itemize}
+\end{itemize} 
 
 {Illustration of 4-fold cross-validation}
-\includegraphics[width=\textwidth]{figure-overfitting-data-folds}
 Randomly assign each observation a fold ID from 1 to 4.
 
 {Illustration of subtrain/validation split}
-\includegraphics[width=\textwidth]{figure-overfitting-data-sets}
 \begin{itemize}
 \item For validation fold 1, all observations with that fold ID are
   considered the validation set.

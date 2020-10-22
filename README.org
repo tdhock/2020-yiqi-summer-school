@@ -61,6 +61,13 @@ Supplementary youtube screencasts showing R command line use:
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
 
 
+** 22 Oct 2020
+[[file:figure-overfitting-paper.R]] makes
+
+[[file:figure-overfitting-paper-loss.png]]
+
+[[file:figure-overfitting-paper.png]]
+
 ** 21 Oct 2020
 [[file:figure-fashion-mnist.R]] makes
 
@@ -68,7 +75,11 @@ Supplementary youtube screencasts showing R command line use:
 
 [[file:figure-fashion-mnist-digits.png]] and
 
-[[file:figure-fashion-mnist-one-example.png]]
+[[file:figure-fashion-mnist-one-example.png]] and
+
+[[file:figure-fashion-mnist-fashion-design.png]] and
+
+[[file:figure-fashion-mnist-digits-design.png]]
 
 ** 14 Aug 2020
 
