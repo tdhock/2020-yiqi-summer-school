@@ -120,6 +120,8 @@ cross-validation
 
 [[file:figure-test-accuracy.png]]
 
+[[file:figure-test-accuracy-both.png]]
+
 [[file:download.R]] downloads data sets.
 
 [[file:figure-validation-loss.R]] plots subtrain/validation loss for

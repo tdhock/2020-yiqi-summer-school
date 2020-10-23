@@ -1,4 +1,7 @@
-\documentclass{article}
+\documentclass[12pt]{article}
+\usepackage{setspace}
+\doublespacing
+\usepackage{times}
 \usepackage{fullpage}
 \usepackage{tikz}
 \usepackage{amsmath,amssymb}
@@ -31,10 +34,56 @@
 
 \maketitle
 
+
+% Your manuscript is 20 or fewer pages, double space, including figures and tables, for each lecture or practice. That makes about 10 book pages. Exception is possible for a few lectures.
+
+% Each manuscript may include 3-5 illustrations.
+
+% Manuscript should be written at a level to be understood by first-year graduate students. 
+
+% Each manuscript has a short, first paragraph (<50 words) about the training goal.
+
+% Do not have too many references as it is not a research paper but list a few suggested readings.
+
+% Include a few (4-6) quizzes for each lecture and expected homework for each practice.
+
+% Text in your chapter should be corresponding to the pre-recorded video or the video to be recorded.
+
+\paragraph{Objective.} This chapter introduces basic concepts in machine learning such
+
 \section{Introduction and applications of machine learning}
 
-Machine learning intro: image classification example.
-  ML is all about learning predictive functions $f(x)\approx y$, where 
+Machine learning is the domain of computer science which is concerned
+with efficient algorithms for making predictions in all kinds of big
+data sets. A defining characteristic of supervised machine learning
+algorithms is that they require a data set for training. The machine
+learning algorithm then memorizes the patterns present in those
+training data, with the goal of accurately predicting similar patterns
+in new test data. Many machine learning algorithms are
+domain-agnostic, which means they have been shown to provide highly
+accurate predictions in a wide variety of application domains
+(computer vision, speech recognition, automatic translation, biology,
+medicine, climate science, chemistry, geology, etc). 
+
+For example, consider the problem of image classification from the
+application domain of computer vision. In this problem, we would like
+a function that can input an image, and output an integer which
+indicates class membership. Figure~\ref{fig:drawing-mnist-train-test}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\textwidth]{drawing-mnist-train-test.pdf}
+  \caption{A learning algorithm inputs a train data set, and outputs a
+    prediction function, f or g. Both f and g input a grayscale image
+    and output a class (integer from 0 to 9), but f is for  
+    digits and g is for fashion.}
+  \label{fig:drawing-mnist-train-test}
+\end{figure}
+
+
+
+ML is all about learning predictive functions
+$f(x)\approx y$, where
   \begin{itemize}
   \item Inputs/features $x$ can be easily computed using traditional
     algorithms, e.g. matrix of pixel intensities in an image.
@@ -53,31 +102,31 @@ Machine learning intro: image classification example.
   Supervised machine learning algorithms.
   I give you a training data set with paired inputs/outputs, e.g.
 
-  \begin{figure}
-    \centering
-    \includegraphics[width=0.4\textwidth]{figure-fashion-mnist-one-example}
-    \includegraphics[width=0.4\textwidth]{screenshot-8-matrix-values}
-    \caption{One example/observation with label 8 in the MNIST data
-      set. \textbf{Left:} representation as greyscale
-      image. \textbf{Right:} representation as $28 \times 28$ matrix;
-      each of the 784 elements is an integer value from 0 to 255.}
-    \label{fig:mnist-one-example}
-  \end{figure}
+  % \begin{figure}
+  %   \centering
+  %   \includegraphics[width=0.4\textwidth]{figure-fashion-mnist-one-example}
+  %   \includegraphics[width=0.4\textwidth]{screenshot-8-matrix-values}
+  %   \caption{One example/observation with label 8 in the MNIST data
+  %     set. \textbf{Left:} representation as greyscale
+  %     image. \textbf{Right:} representation as $28 \times 28$ matrix;
+  %     each of the 784 elements is an integer value from 0 to 255.}
+  %   \label{fig:mnist-one-example}
+  % \end{figure}
 
-  \begin{figure}
-    \centering
-    \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits}
-    \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion}
-    % \\
-    % \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits-design}
-    % \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion-design} 
-    \caption{Seven example images from each class/label in the original MNIST digits
-      (left) and Fashion-MNIST (right) data sets. For each data set
-      different label values from 0 to 9 appear are shown in panels
-      from left to right, and different examples/observations are
-      shown in panels from top to bottom.} 
-    \label{fig:fashion-mnist}
-  \end{figure}
+  % \begin{figure}
+  %   \centering
+  %   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits}
+  %   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion}
+  %   % \\
+  %   % \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits-design}
+  %   % \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion-design} 
+  %   \caption{Seven example images from each class/label in the original MNIST digits
+  %     (left) and Fashion-MNIST (right) data sets. For each data set
+  %     different label values from 0 to 9 appear are shown in panels
+  %     from left to right, and different examples/observations are
+  %     shown in panels from top to bottom.} 
+  %   \label{fig:fashion-mnist}
+  % \end{figure}
 
   Your job is to code an algorithm that learns the function $f$ from
   the training data. (you don't code $f$)
@@ -99,16 +148,6 @@ Learning two different functions.
 Say \textsc{Learn} is a learning algorithm you have coded.
 \begin{figure}
   \centering
-  \includegraphics[width=0.8\textwidth]{drawing-mnist-train-test.pdf}
-  \caption{A learning algorithm inputs a train data set, and outputs a
-    prediction function, f or g. Both f and g input a grayscale image
-    and output a class (integer from 0 to 9), but f is for  
-    digits and g is for fashion.}
-  \label{fig:drawing-mnist-train-test}
-\end{figure}
-
-\begin{figure}
-  \centering
   \includegraphics[width=0.55\textwidth]{figure-overfitting-paper}
   \includegraphics[width=0.4\textwidth]{figure-overfitting-paper-loss}   
   \caption{Illustration of underfitting and overfitting in a neural
@@ -128,6 +167,8 @@ Say \textsc{Learn} is a learning algorithm you have coded.
     set).}
   \label{fig:overfitting-paper}
 \end{figure}
+
+Figure~\ref{fig:overfitting-paper}
 
 Machine learning for cell image classification (CellProfiler).
 Jones {\it et al.} PNAS 2009. Scoring diverse cellular morphologies in
@@ -152,6 +193,20 @@ Want: f(english)=french
 
 {Machine learning for medical diagnosis}
 want: f(image) = blood pressure, heart attack or stroke risk
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{drawing-cross-validation}
+  \caption{$K=3$ fold cross-validation. \textbf{Left:} the first step
+    is to randomly assign a fold ID from 1 to $K$ to each of the
+    observations/rows. \textbf{Right:} in each of the
+    $k\in\{1, \dots, K\}$ splits, the observations with fold ID $k$
+    are set aside as a test set, and the other observations are used
+    as a train set to learn a prediction function (f1--f3), which is
+    used to predict for the test set, and to compute accuracy metrics
+    (A1--A3).}
+  \label{fig:cross-validation}
+\end{figure}
 
 \section{Demonstration of overfitting in regression /
   first steps with R}
@@ -197,7 +252,9 @@ any other problems you encounter in your work) you should
   $x\in\mathbb R$.
 \item We use a regression problem with outputs $y\in\mathbb R$.
 \item Goal is to learn a function $f(x)\in\mathbb R$.
-\end{itemize} 
+\end{itemize}
+
+
 
 {Illustration of 4-fold cross-validation}
 Randomly assign each observation a fold ID from 1 to 4.
@@ -341,10 +398,6 @@ for(i in maxit.values)for(p in pattern.values){
 ...
 \end{verbatim}
 
-  \includegraphics[width=\textwidth]{figure-overfitting-pred-units=20-maxit=1.png}
-  ...
-  \includegraphics[width=\textwidth]{figure-overfitting-pred-units=20-maxit=10000.png}
-  \includegraphics[width=\textwidth]{figure-overfitting-data-loss-20.png}
   
 {Overfitting}
 \begin{itemize}
@@ -380,10 +433,6 @@ Result is:
 30:       sin validation 10000  19.5051785
 \end{verbatim}
 
-\includegraphics[width=\textwidth]{figure-overfitting-pred-units=2-maxit=1.png}
-...
-\includegraphics[width=\textwidth]{figure-overfitting-pred-units=2-maxit=10000.png}
-\includegraphics[width=\textwidth]{figure-overfitting-data-loss-2.png}
 
 {How does the neural network predict/learn?}
   \begin{eqnarray*}
@@ -407,9 +456,6 @@ Result is:
   4.643852  18.973225  28.348342 
 \end{verbatim}
 
-  \includegraphics[width=\textwidth]{figure-overfitting-pred-units=200-maxit=1.png}
-  \includegraphics[width=\textwidth]{figure-overfitting-pred-units=200-maxit=10000.png}
-  \includegraphics[width=\textwidth]{figure-overfitting-data-loss-200.png}
 
 {Comments on other model sizes}
   \begin{itemize}
@@ -443,13 +489,9 @@ Result is:
   \item In this tutorial there are ten image classes $y\in\{0, 1, \dots, 9\}$, one for each
     digit.
   \item Want to learn $f$ such that
-    $f(\includegraphics[height=1cm]{mnist-0})=0$,
-    $f(\includegraphics[height=1cm]{mnist-1})=1$, etc.
   \item Code for figures in this section:
     \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-validation-loss.R}
   \end{itemize}
-
-  \includegraphics[height=\textheight]{figure-validation-loss-digits}
 
 {Representation of digits in CSV}
   \begin{itemize}
@@ -573,8 +615,6 @@ In \texttt{fit} you can specify
   for hyper-parameter selection). 
 \end{itemize}
 
-\includegraphics[width=\textwidth]{figure-validation-loss-linear}
-
 {Sparse (convolutional) model R code}
 \begin{verbatim}
 library(keras)
@@ -598,8 +638,6 @@ conv.model <- keras_model_sequential() %>%
     easier/faster.
   \end{itemize}
 
-  \includegraphics[width=\textwidth]{figure-validation-loss-conv}
-
 {Dense (fully connected) neural network R code}
 \begin{verbatim}
 library(keras)
@@ -619,10 +657,6 @@ dense.model <- keras_model_sequential() %>%
     activation = 'softmax')
 \end{verbatim}
 
-\includegraphics[width=\textwidth]{figure-validation-loss-dense}
-
-\includegraphics[width=\textwidth]{figure-validation-loss-three}
-
 {4-fold cross-validation for model evaluation}
   Does the convolutional model provide more accurate predictions on
   unseen test data? First randomly assign a fold ID to each image/observation,
@@ -641,11 +675,17 @@ dense.model <- keras_model_sequential() %>%
   \item Finally compute the prediction accuracy with respect to the
     held-out test set.
   \end{itemize}
-  Plot accuracy values (or mean/sd) after learning/testing four times
-  (one for each test fold).
+Plot accuracy values (or mean/sd) after learning/testing four times
+(one for each test fold).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figure-test-accuracy-both}
+  \caption{test accuracy values}
+  \label{fig:test-accuracy}
+\end{figure}
  
 {Accuracy rates for each test fold}
-  \includegraphics[width=\textwidth]{figure-test-accuracy-baseline}
   \begin{itemize}
   \item Always a good idea to compare with the trivial baseline model which always
     predicts the most frequent class in the train set. (ignoring all
@@ -657,7 +697,6 @@ dense.model <- keras_model_sequential() %>%
   \end{itemize}
 
 {Zoom to learned models}
-  \includegraphics[width=\textwidth]{figure-test-accuracy}
   \begin{itemize}
   \item Dense neural network slightly more accurate
     than linear model, convoluational significantly more
