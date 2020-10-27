@@ -97,11 +97,12 @@ for Trouser, 2 for Pullover, etc).  In both data sets the goal is to
 learn a function
 $f:\mathbb R^{28\times 28}\rightarrow \{0,1,\dots, 9\}$ which inputs
 an image $\mathbf x$ and outputs a predicted class $f(\mathbf x)$
-which should ideally be the same as the corresponding label $y$. As
-mentioned above, a big advantage of supervised learning algorithms is
-that they are typically domain-agnostic, meaning that they can learn
-accurate prediction functions $f$ using data sets with different kinds
-of patterns. That means we can use a single learning algorithm
+which should ideally be the same as the corresponding label $y$.
+
+As mentioned above, a big advantage of supervised learning algorithms
+is that they are typically domain-agnostic, meaning that they can
+learn accurate prediction functions $f$ using data sets with different
+kinds of patterns. That means we can use a single learning algorithm
 \textsc{Learn} on both the MNIST or Fashion-MNIST data sets
 (Figure~\ref{fig:drawing-mnist-train-test}, left). For the MNIST data
 set the learning algorithm will output a function for predicting the
@@ -111,9 +112,12 @@ will output a function for predicting the class of a clothing image
 this supervised machine learning approach to image classification is
 that the programmer does not need any domain-specific knowledge about
 the expected pattern (e.g., shape of each digit, appearance of each
-clothing type). Instead, the learning algorithm infers the
-domain-specific pattern and prediction function from the data set
-(which we assume has been accurately labeled).
+clothing type). Instead, we assume there is a data set with enough
+labels for the learning algorithm to accurately infer the
+domain-specific pattern and prediction function. This means that the
+machine learning approach is only appropriate when it is
+possible/inexpensive to create a large labeled data set that
+accurately represents the pattern/function to be learned.
 
 How do we know if the learning algorithm is working properly? The goal
 of supervised learning is \keyword{generalization}, which means the
@@ -124,7 +128,7 @@ during learning). To formalize this idea, and to compute quantitative
 evaluation metrics (accuracy/error rates), we need a test data set, as
 explained in the next section.
 
-\subsection{$K$-fold cross-validation for training and evaluation}
+\subsection{$K$-fold cross-validation for evaluating prediction/test accuracy}
 
 Each input $\mathbf x$ in a data set is typically represented as one
 of $N$ rows in a design matrix with $D$ columns (one for each
@@ -185,88 +189,73 @@ Figure~\ref{fig:test-accuracy}).
   \label{fig:cross-validation}
 \end{figure}
 
-The $K$-fold cross-validation algorithm generates $K$ splits, and can
+The $K$-fold cross-validation procudure generates $K$ splits, and can
 therefore be used to estimate both mean and variance of prediction
 accuracy/error. The number of folds/splits $K$ is a user-defined
-parameter which must be at least 2, and at most $N$. Typical choices
-range from $K=3$ to 10, and usually the value of $K$ does not have a
-large effect on the final estimated mean/variance of prediction
+integer parameter which must be at least 2, and at most $N$. Typical
+choices range from $K=3$ to 10, and usually the value of $K$ does not
+have a large effect on the final estimated mean/variance of prediction
 accuracy/error. The algorithm begins by randomly assigning a fold ID
 number (integer from 1 to $K$) to each observation
-(Figure~\ref{fig:cross-validation}). In most applications you will
-need to create train/test splits yourself. TODO For example, Algorithm
-1 resulted in $91.2\pm 2.2\%$
+(Figure~\ref{fig:cross-validation}, left). Then for each unique fold
+value from 1 to $K$, we hold out the corresponding observations/rows
+as a test set, and use data from all other folds as a train set
+(Figure~\ref{fig:cross-validation}, right). Each train set is used to
+learn a corresponding prediction function, which is then used to
+predict on the held out test data. Finally, accuracy/error metrics are
+computed in order to quantify how well the predictions fit the labels
+for the test data. Overall for each data set and learning algorithm
+the $K$-fold cross-validation procedure results in $K$ splits, $K$
+learned functions, and $K$ test accuracy/error metrics, which are
+typically combined by taking the mean and standard deviation (or
+median and quartiles). Other algorithms may be used with the same fold
+assignments, in order to compare algorithms in terms of accuracy/error
+rates in particular data sets.
 
+For example, Figure~\ref{fig:test-accuracy} uses $K=4$-fold
+cross-validation to compare four learned functions on an image
+classification problem. The accuracy rates of the ``dense'' and
+``linear'' functions, $97.4 \pm 1.6 \%$ and $96.3 \pm 1.9 \%$ (mean
+$\pm$ standard deviation) are not significantly different. Both rates
+are significantly larger than the accuracy of the ``baseline''
+constant function, $16.4 \pm 1.4 \%$, and smaller than the accuracy of
+the ``conv'' function, $99.3 \pm 1.1 \%$. We can therefore conclude
+that the most accurate learning algorithm for this problem, among
+these four candidates, is the ``conv'' method (which uses a
+convolutional neural network, explained later).  It is important to
+note that statements about what algorithm is most accurate only makes
+sense in terms of a particular data set, after having performed
+$K$-fold cross-validation to estimate prediction accuracy/error rates.
 
+\subsection{$K$-fold cross-validation for avoiding overfitting}
 
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=0.4\textwidth]{figure-fashion-mnist-one-example}
+%   \includegraphics[width=0.4\textwidth]{screenshot-8-matrix-values}
+%   \caption{One example/observation with label 8 in the MNIST data
+%   set. \textbf{Left:} representation as greyscale
+%   image. \textbf{Right:} representation as $28 \times 28$ matrix;
+%   each of the 784 elements is an integer value from 0 to 255.}
+%   \label{fig:mnist-one-example}
+% \end{figure}
 
+% \begin{figure}
+%   \centering
+%   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits}
+%   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion}
+%   %   \\
+%   %   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits-design}
+%   %   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion-design} 
+%   \caption{Seven example images from each class/label in the original MNIST digits
+%   (left) and Fashion-MNIST (right) data sets. For each data set
+%   different label values from 0 to 9 appear are shown in panels
+%   from left to right, and different examples/observations are
+%   shown in panels from top to bottom.} 
+%   \label{fig:fashion-mnist}
+% \end{figure}
 
-
-
-ML is all about learning predictive functions
-$f(x)\approx y$, where
-  \begin{itemize}
-  \item Inputs/features $x$ can be easily computed using traditional
-    algorithms, e.g. matrix of pixel intensities in an image.
-  \item Outputs/labels $y$ are what we want to predict, easy to get by
-    asking a human, but hard to compute using traditional algorithms,
-    e.g. image class.
-  \item Input $x$ = image of digit, output $y\in\{0,1,\dots,9\}$, \\--
-    this is a classification problem with 10 classes.\\
-  $f(\includegraphics[height=1cm]{mnist-0})=0$,
-  $f(\includegraphics[height=1cm]{mnist-1})=1$
-\item Traditional/unsupervised algorithm: I give you a pixel intensity matrix
-  $x\in\RR^{16\times 16}$, you code a function $f$ that returns one of
-  the 10 possible digits. Q: how to do that?
-  \end{itemize}
-
-  Supervised machine learning algorithms.
-  I give you a training data set with paired inputs/outputs, e.g.
-
-  % \begin{figure}
-  %   \centering
-  %   \includegraphics[width=0.4\textwidth]{figure-fashion-mnist-one-example}
-  %   \includegraphics[width=0.4\textwidth]{screenshot-8-matrix-values}
-  %   \caption{One example/observation with label 8 in the MNIST data
-  %     set. \textbf{Left:} representation as greyscale
-  %     image. \textbf{Right:} representation as $28 \times 28$ matrix;
-  %     each of the 784 elements is an integer value from 0 to 255.}
-  %   \label{fig:mnist-one-example}
-  % \end{figure}
-
-  % \begin{figure}
-  %   \centering
-  %   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits}
-  %   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion}
-  %   % \\
-  %   % \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits-design}
-  %   % \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion-design} 
-  %   \caption{Seven example images from each class/label in the original MNIST digits
-  %     (left) and Fashion-MNIST (right) data sets. For each data set
-  %     different label values from 0 to 9 appear are shown in panels
-  %     from left to right, and different examples/observations are
-  %     shown in panels from top to bottom.} 
-  %   \label{fig:fashion-mnist}
-  % \end{figure}
-
-  Your job is to code an algorithm that learns the function $f$ from
-  the training data. (you don't code $f$)
-  
-  Source: github.com/cazala/mnist
-
-  Advantages of supervised machine learning.
-  \begin{itemize}
-  \item Input $x\in\RR^{16\times 16}$, output $y\in\{0,1,\dots,9\}$ types the same!
-  \item Can use same learning algorithm regardless of pattern.
-  \item Pattern encoded in the labels (not the algorithm).
-  \item Useful if there are many un-labeled data, but few labeled data
-    (or getting labels is long/costly).
-  \item State-of-the-art accuracy (if there is enough training data).
-  \end{itemize}
-  Sources: github.com/cazala/mnist, github.com/zalandoresearch/fashion-mnist
-
-Learning two different functions.
-Say \textsc{Learn} is a learning algorithm you have coded.
+\subsection{Other applications}
 
 Machine learning for cell image classification (CellProfiler).
 Jones {\it et al.} PNAS 2009. Scoring diverse cellular morphologies in
