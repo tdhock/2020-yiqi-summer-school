@@ -2,6 +2,8 @@ README.html
 HOCKING-chapter.pdf
 *.rds
 Practice session
+*.bbl
+*.blg
 *.aux
 *.log
 *.nav

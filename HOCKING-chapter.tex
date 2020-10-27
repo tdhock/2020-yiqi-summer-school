@@ -2,6 +2,7 @@
 \usepackage{setspace}
 \doublespacing
 \usepackage{times}
+\usepackage{natbib}
 \usepackage{fullpage}
 \usepackage{tikz}
 \usepackage{amsmath,amssymb}
@@ -19,6 +20,7 @@
 \DeclareMathOperator*{\maximize}{maximize}
 \DeclareMathOperator*{\minimize}{minimize}
 \newcommand{\sign}{\operatorname{sign}}
+\newcommand{\keyword}[1]{\textbf{#1}}
 \newcommand{\RR}{\mathbb R}
 \newcommand{\ZZ}{\mathbb Z}
 \newcommand{\NN}{\mathbb N}
@@ -49,7 +51,10 @@
 
 % Text in your chapter should be corresponding to the pre-recorded video or the video to be recorded.
 
-\paragraph{Objective.} This chapter introduces basic concepts in machine learning such
+\paragraph{Objective.} This chapter introduces basic concepts and
+algorithms from machine learning. The goal is to learn how to use
+cross-validation for training and testing machine learning algorithms,
+and to implement neural networks in R code.
 
 \section{Introduction and applications of machine learning}
 
@@ -65,20 +70,136 @@ accurate predictions in a wide variety of application domains
 (computer vision, speech recognition, automatic translation, biology,
 medicine, climate science, chemistry, geology, etc). 
 
-For example, consider the problem of image classification from the
-application domain of computer vision. In this problem, we would like
-a function that can input an image, and output an integer which
-indicates class membership. Figure~\ref{fig:drawing-mnist-train-test}
-
-\begin{figure}
+\begin{figure} 
   \centering
   \includegraphics[width=0.8\textwidth]{drawing-mnist-train-test.pdf}
   \caption{A learning algorithm inputs a train data set, and outputs a
-    prediction function, f or g. Both f and g input a grayscale image
-    and output a class (integer from 0 to 9), but f is for  
-    digits and g is for fashion.}
+    prediction function, g or h. Both g and h input a grayscale image
+    and output a class (integer from 0 to 9), but g is for  
+    digits and h is for fashion.}
   \label{fig:drawing-mnist-train-test}
 \end{figure}
+
+For example, consider the problem of image classification from the
+application domain of computer vision. In this problem, we would like
+a function that can input an image, and output an integer which
+indicates class membership. More precisely, let us consider the MNIST
+and Fashion-MNIST data sets
+(Figure~\ref{fig:drawing-mnist-train-test}), in which each input is
+grayscale image with height and width of 28 pixels
+\citep{LeCun1998,Xiao2017} then we typically represent each input as a
+matrix of real numbers $\mathbf x\in\mathbb R^{28\times 28}$. In both
+the MNIST and Fashion-MNIST data sets each image has a corresponding
+label which is an integer $y\in\{0,1,\dots,9\}$. In the MNIST data set
+each image/label represents a digit, whereas in Fashion-MNIST each
+image/label represents a category of clothing (0 for T-shirt/top, 1
+for Trouser, 2 for Pullover, etc).  In both data sets the goal is to
+learn a function
+$f:\mathbb R^{28\times 28}\rightarrow \{0,1,\dots, 9\}$ which inputs
+an image $\mathbf x$ and outputs a predicted class $f(\mathbf x)$
+which should ideally be the same as the corresponding label $y$. As
+mentioned above, a big advantage of supervised learning algorithms is
+that they are typically domain-agnostic, meaning that they can learn
+accurate prediction functions $f$ using data sets with different kinds
+of patterns. That means we can use a single learning algorithm
+\textsc{Learn} on both the MNIST or Fashion-MNIST data sets
+(Figure~\ref{fig:drawing-mnist-train-test}, left). For the MNIST data
+set the learning algorithm will output a function for predicting the
+class of digit images, and for Fashion-MNIST the learning algorithm
+will output a function for predicting the class of a clothing image
+(Figure~\ref{fig:drawing-mnist-train-test}, right). The advantage of
+this supervised machine learning approach to image classification is
+that the programmer does not need any domain-specific knowledge about
+the expected pattern (e.g., shape of each digit, appearance of each
+clothing type). Instead, the learning algorithm infers the
+domain-specific pattern and prediction function from the data set
+(which we assume has been accurately labeled).
+
+How do we know if the learning algorithm is working properly? The goal
+of supervised learning is \keyword{generalization}, which means the
+learned prediction function $f$ should accurately predict
+$f(\mathbf x) = y$ for any inputs/outputs $(\mathbf x,y)$ that will be
+seen in a desired application (including new data that were not seen
+during learning). To formalize this idea, and to compute quantitative
+evaluation metrics (accuracy/error rates), we need a test data set, as
+explained in the next section.
+
+\subsection{$K$-fold cross-validation for training and evaluation}
+
+Each input $\mathbf x$ in a data set is typically represented as one
+of $N$ rows in a design matrix with $D$ columns (one for each
+dimension or feature). Each output $y$ is represented as an element of
+a label vector of size $N$, which can be visualized as another column
+alongside the design matrix (Figure~\ref{fig:cross-validation},
+left). For example, in the image data sets discussed above we have
+$N=60,000$ labeled images/rows, each with $D=784$ dimensions/features
+(one for each of the $28\times 28$ pixels in the image).
+
+The goal of supervised learning is to find a prediction function $f$
+such that $f(\mathbf x) = y$ for all inputs/outputs $(\mathbf x,y)$ in
+a test data set (which is not available for learning
+$f$). So how do we learn $f$ for accurate prediction on a test data
+set, if that test set is not available? We must assume that we have
+access to a train data set with the same statistical distribution as
+the test data. The train data set is used to learn $f$, and the test
+data can only be used for evaluating the prediction accuracy/error of
+$f$.
+
+Some benchmark data sets which are used for machine learning research,
+like MNIST and Fashion-MNIST, have designated train/test
+sets. However, in most applications of machine learning to real data
+sets, train/test sets must be created. One approach is to create a
+single train/test split by randomly assigning a set to each of the $N$
+rows/observations, say 50\% train rows and 50\% test rows. The
+advantage of that approach is simplicity, but the drawback is that we
+can only report accuracy/error metrics with respect to one test set
+(e.g., the algorithm learned a function which accurately predicted
+91.3\% of observations/labels in the test set, meaning 8.7\% error
+rate). 
+
+In addition to estimating the accuracy/error rate, is important to
+have some estimate of variance in order to make statements about
+whether the prediction accuracy/error of the learned function $f$ is
+significantly larger/smaller than other prediction functions. The
+other functions to compare against may be from other supervised
+learning algorithms, or some other method that does not use machine
+learning (e.g., a domain-specific physical/mechanistic model). A common
+baseline is the constant function $f(\mathbf x) = y_0$ where $y_0$ is
+the average or most frequent label in the train data. This baseline
+ignores all of the inputs/features $\mathbf x$, and can be used to
+show that the algorithm is learning some non-trivial predictive relationship
+between inputs and outputs (for an example see
+Figure~\ref{fig:test-accuracy}).
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{drawing-cross-validation}
+  \caption{$K=3$ fold cross-validation. \textbf{Left:} the first step
+    is to randomly assign a fold ID from 1 to $K$ to each of the
+    observations/rows. \textbf{Right:} in each of the
+    $k\in\{1, \dots, K\}$ splits, the observations with fold ID $k$
+    are set aside as a test set, and the other observations are used
+    as a train set to learn a prediction function (f1--f3), which is
+    used to predict for the test set, and to compute accuracy metrics
+    (A1--A3).}
+  \label{fig:cross-validation}
+\end{figure}
+
+The $K$-fold cross-validation algorithm generates $K$ splits, and can
+therefore be used to estimate both mean and variance of prediction
+accuracy/error. The number of folds/splits $K$ is a user-defined
+parameter which must be at least 2, and at most $N$. Typical choices
+range from $K=3$ to 10, and usually the value of $K$ does not have a
+large effect on the final estimated mean/variance of prediction
+accuracy/error. The algorithm begins by randomly assigning a fold ID
+number (integer from 1 to $K$) to each observation
+(Figure~\ref{fig:cross-validation}). In most applications you will
+need to create train/test splits yourself. TODO For example, Algorithm
+1 resulted in $91.2\pm 2.2\%$
+
+
+
+
 
 
 
@@ -146,29 +267,6 @@ $f(x)\approx y$, where
 
 Learning two different functions.
 Say \textsc{Learn} is a learning algorithm you have coded.
-\begin{figure}
-  \centering
-  \includegraphics[width=0.55\textwidth]{figure-overfitting-paper}
-  \includegraphics[width=0.4\textwidth]{figure-overfitting-paper-loss}   
-  \caption{Illustration of underfitting and overfitting in a neural
-    network regression model (single hidden layer, 50 hidden
-    units). \textbf{Left:} noisy data with a nonlinear sine wave
-    pattern (grey circles), learned functions (colored curves), and
-    residuals/errors (black line segments) are shown for three values
-    of epochs (panels from left to right) and two data subsets (panels
-    from top to bottom). \textbf{Right:} in each epoch the model
-    parameters are updated using gradient descent with respect to the
-    subtrain loss, which decreases with more epochs. The
-    optimal/minimum loss with respect to the validation set occurs at
-    64 epochs, indicating underfitting for smaller epochs (green
-    function, too regular/linear for both subtrain/validation sets)
-    and overfitting for larger epochs (purple function, very
-    irregular/nonlinear so good fit for subtrain but not validation
-    set).}
-  \label{fig:overfitting-paper}
-\end{figure}
-
-Figure~\ref{fig:overfitting-paper}
 
 Machine learning for cell image classification (CellProfiler).
 Jones {\it et al.} PNAS 2009. Scoring diverse cellular morphologies in
@@ -193,20 +291,6 @@ Want: f(english)=french
 
 {Machine learning for medical diagnosis}
 want: f(image) = blood pressure, heart attack or stroke risk
-
-\begin{figure}
-  \centering
-  \includegraphics[width=\textwidth]{drawing-cross-validation}
-  \caption{$K=3$ fold cross-validation. \textbf{Left:} the first step
-    is to randomly assign a fold ID from 1 to $K$ to each of the
-    observations/rows. \textbf{Right:} in each of the
-    $k\in\{1, \dots, K\}$ splits, the observations with fold ID $k$
-    are set aside as a test set, and the other observations are used
-    as a train set to learn a prediction function (f1--f3), which is
-    used to predict for the test set, and to compute accuracy metrics
-    (A1--A3).}
-  \label{fig:cross-validation}
-\end{figure}
 
 \section{Demonstration of overfitting in regression /
   first steps with R}
@@ -245,6 +329,32 @@ any other problems you encounter in your work) you should
 \item Code for figures in this section:
   \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-overfitting.R}
 \end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.55\textwidth]{figure-overfitting-paper}
+  \includegraphics[width=0.4\textwidth]{figure-overfitting-paper-loss}   
+  \caption{Illustration of underfitting and overfitting in a neural
+    network regression model (single hidden layer, 50 hidden
+    units). \textbf{Left:} noisy data with a nonlinear sine wave
+    pattern (grey circles), learned functions (colored curves), and
+    residuals/errors (black line segments) are shown for three values
+    of epochs (panels from left to right) and two data subsets (panels
+    from top to bottom). \textbf{Right:} in each epoch the model
+    parameters are updated using gradient descent with respect to the
+    subtrain loss, which decreases with more epochs. The
+    optimal/minimum loss with respect to the validation set occurs at
+    64 epochs, indicating underfitting for smaller epochs (green
+    function, too regular/linear for both subtrain/validation sets)
+    and overfitting for larger epochs (purple function, very
+    irregular/nonlinear so good fit for subtrain but not validation
+    set).}
+  \label{fig:overfitting-paper}
+\end{figure}
+
+Figure~\ref{fig:overfitting-paper}
+
+
 
 {Three different data sets/patterns}
 \begin{itemize}
@@ -697,18 +807,21 @@ Plot accuracy values (or mean/sd) after learning/testing four times
   \end{itemize}
 
 {Zoom to learned models}
-  \begin{itemize}
-  \item Dense neural network slightly more accurate
-    than linear model, convoluational significantly more
-    accurate than others.
-  \item Conclusion: convolutional neural network should be preferred
-    for most accurate predictions in these data.
-  \item Maybe not the same conclusion in other data sets, with the
-    same models. (always need to do cross-validation experiments to
-    see which model is best in any given data set)
-  \item Maybe other models/algorithms would be even more accurate in
-    these data. (more/less layers, more/less units, completely
-    different algorithm such as random forests, boosting, etc)
-  \end{itemize}
+\begin{itemize}
+\item Dense neural network slightly more accurate
+  than linear model, convoluational significantly more
+  accurate than others.
+\item Conclusion: convolutional neural network should be preferred
+  for most accurate predictions in these data.
+\item Maybe not the same conclusion in other data sets, with the
+  same models. (always need to do cross-validation experiments to
+  see which model is best in any given data set)
+\item Maybe other models/algorithms would be even more accurate in
+  these data. (more/less layers, more/less units, completely
+  different algorithm such as random forests, boosting, etc)
+\end{itemize}
+
+\bibliographystyle{abbrvnat}
+\bibliography{refs} 
 
 \end{document}
