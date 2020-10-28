@@ -60,7 +60,8 @@ Supplementary youtube screencasts showing R command line use:
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1MvTf_JOI00_eIPcoeYMM_o][Number of hidden units is a regularization parameter (R keras)]]
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
 
-
+** 27 Oct 2020
+[[file:mnist.tex]] contains figure/captions not used in chapter.
 ** 22 Oct 2020
 [[file:figure-overfitting-paper.R]] makes
 

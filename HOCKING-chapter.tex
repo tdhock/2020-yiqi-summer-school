@@ -227,97 +227,112 @@ note that statements about what algorithm is most accurate only makes
 sense in terms of a particular data set, after having performed
 $K$-fold cross-validation to estimate prediction accuracy/error rates.
 
-\subsection{$K$-fold cross-validation for avoiding overfitting}
-
-% \begin{figure}
-%   \centering
-%   \includegraphics[width=0.4\textwidth]{figure-fashion-mnist-one-example}
-%   \includegraphics[width=0.4\textwidth]{screenshot-8-matrix-values}
-%   \caption{One example/observation with label 8 in the MNIST data
-%   set. \textbf{Left:} representation as greyscale
-%   image. \textbf{Right:} representation as $28 \times 28$ matrix;
-%   each of the 784 elements is an integer value from 0 to 255.}
-%   \label{fig:mnist-one-example}
-% \end{figure}
-
-% \begin{figure}
-%   \centering
-%   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits}
-%   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion}
-%   %   \\
-%   %   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-digits-design}
-%   %   \includegraphics[width=0.49\textwidth]{figure-fashion-mnist-fashion-design} 
-%   \caption{Seven example images from each class/label in the original MNIST digits
-%   (left) and Fashion-MNIST (right) data sets. For each data set
-%   different label values from 0 to 9 appear are shown in panels
-%   from left to right, and different examples/observations are
-%   shown in panels from top to bottom.} 
-%   \label{fig:fashion-mnist}
-% \end{figure}
-
 \subsection{Other applications}
 
-Machine learning for cell image classification (CellProfiler).
-Jones {\it et al.} PNAS 2009. Scoring diverse cellular morphologies in
-image-based screens with iterative feedback and machine learning.
-\begin{itemize}
-  \item Input $x$ = color image of cell, 
-  \item Output $y\in\{\text{yes}, \text{no}\}$ (binary classification),
-\end{itemize}
+So far we have only discussed machine learning algorithms in the
+context of a single prediction problem, image classification. In this
+section we briefly discuss other applications of machine learning. In
+each application the set of possible inputs $\mathbf x$ and outputs
+$y$ are different, but machine learning algorithms can always be used
+to learn a prediction function $f(x)\approx y$. 
 
-{Machine learning for image segmentation}
-Russell {\it et al.} 2007. LabelMe paper.
-Q: What are the types/dimensions of $x,y,f$ in this example?
+\citep{Jones2009} proposed to use interactive machine learning for
+cell image classification in the CellProfiler Analyst system. This
+application is similar to the previously discussed digit/fashion
+classification problem, but with only two classes (binary
+classification). In this context the input is a multi-color image of
+cell $\mathbf x\in\mathbb R^{h \times w \times c}$ where $h,w$ are the
+height and width of the image in pixels, and $c=3$ is the number of
+channels used to represent a color image (red, green, blue). The
+output $y\in\{0,1\}$ is a binary label which indicates whether or not
+the image contains the cell phenotype of interest. 
 
-{Machine learning for spam filtering (Gmail)}
-Want: $f$(email message)$\in\{0,1\}$ -- binary classification, spam=1
-or not=0.
+Some email programs use machine learning for spam filtering, which is
+another example of a binary classification problem. When you click the
+``spam'' button in the email program you are labeling that email as
+spam ($y=1$), and when you respond to an email you are labeling that
+email as not spam ($y=0$). The input $\mathbf x$ is an email message,
+which can be represented using a ``bag-of-words'' vector (each element
+is the number of times a specific word occurs in that email message).
 
-{Machine learning for translation (google books)}
+\citet{Russell2008} proposed the LabelMe tool for creating data sets
+for image segmentation, which is more complex than the previously
+discussed image classification problems. In this context the input
+$\mathbf x\in\mathbb R^{h \times w \times c}$ is typically a
+multi-color image, and the output
+$\mathbf y\in \{0,1\}^{h \times w}$ is a binary mask (one element
+for every pixel in the image) indicating whether or not that pixel
+contains an object of interest.
 
-{Machine learning for translation (google translate)}
-Want: f(english)=french
+Machine learning can be used for automatic translation between
+languages. In this context the input is a text in one language (e.g.,
+French) and the output is the text translated to another language
+(e.g., English). The desired prediction function $f$ inputs a French
+text and outputs the English translation.
 
-{Machine learning for medical diagnosis}
-want: f(image) = blood pressure, heart attack or stroke risk
+Machine learning can be used for medical diagnosis. For example
+\citet{Poplin2017} showed that retinal photographs can be used to
+predict blood pressure or risk of heart attack. Since the output $y$
+is a real number (e.g., blood pressure of 120 mm mercury), we refer to
+this as a regression problem.
 
-\section{Demonstration of overfitting in regression /
-  first steps with R}
+\section{Avoiding under/overfitting in a neural network for regression}
 
-{Machine learning algorithms in practice}
-To learn a good prediction function for any of these problems (and
-any other problems you encounter in your work) you should
-\begin{itemize}
-\item First gather a data set that you will use to train/test the
-  machine learning algorithms, typically a CSV file with rows for
-  observations and columns for features.
-\item Use K-fold Cross-Validation to repeatedly divide the
-  observations into train/test sets. Use the train set to learn
-  machine learning model parameters, and use the test set to
-  estimate prediction error.
-\item Try a variety of different learning algorithms (e.g. linear
-  models, random forests, boosting, neural networks, support vector
-  machines, ...), because you don't know which one will result in
-  most accurate predictions for any given data set. 
-\item Each learning algorithm has different hyper-parameters which
-  control complexity/regularization/overfitting, and typically must
-  be chosen by the user (you) by dividing the train data into
-  subtrain/validation sets. Use the hyper-parameter which is
-  best with respect to the held-out validation set.
-\end{itemize}
+Now we consider a simple regression problem for which the input
+$x\in\mathbb R$ is a single real number ($D=1$ feature/column in the
+design matrix), and the output $y\in\mathbb R$ is as well. Using a
+neural network with a single hidden layer of $U$ units, there are two
+unknown \keyword{parameter} vectors which need to be learned using the training
+data, $\mathbf w\in \mathbb R^U$ and $\mathbf v\in \mathbb R^U$. The prediction
+function $f$ is then defined as
+\begin{equation}
+  f(x) = \mathbf w^\intercal \sigma( x \mathbf v ) = \mathbf w^\intercal \mathbf z,
+\end{equation}
+where $\sigma:\mathbb R^U\rightarrow \mathbb R^U$ is a non-linear
+activation function, and $\mathbf z\in \mathbb R^U$ is the vector of
+hidden units. Typical activation functions include the logistic
+sigmoid $\sigma(t)=1/(1+\exp(-t))$ and the rectifier (or rectified
+linear units, ReLU) $\sigma(t)=\max(0, t)$. The prediction function is
+learned using gradient descent, which is an algorithm that attempts to
+find parameters $\mathbf w,\mathbf v$ which minimize the mean squared
+error between the predictions and the corresponding labels in the $N$
+train data,
+\begin{equation}
+  \mathcal L(\mathbf w, \mathbf v) = \frac{1}{N} \sum_{i=1}^N [ \mathbf w^\intercal \sigma( x_i \mathbf v ) - y_i ]^2. \label{eq:loss}
+\end{equation}
+Gradient descent begins using un-informative parameters
+$\mathbf w_0,\mathbf v_0$ (typically random numbers close to zero),
+then at each iteration $t\in\{1,\dots, T\}$ the parameters are
+improved by taking a step of size $\alpha>0$ in the negative gradient
+direction,
+\begin{eqnarray}
+  \mathbf w_t &=& \mathbf w_{t-1} - \alpha \nabla_{\mathbf w} \mathcal L(\mathbf w, \mathbf v),\\
+  \mathbf v_t &=& \mathbf v_{t-1} - \alpha \nabla_{\mathbf v} \mathcal L(\mathbf w, \mathbf v).
+\end{eqnarray}
+The algorithm described above is referred to as ``full gradient''
+because the gradient is defined using the full set of $N$ samples in
+the train set. Other common variants include ``stochastic gradient''
+(gradient uses one sample) and ``minibatch'' (gradient uses several
+samples). When doing gradient descent on a neural network model, one
+``epoch'' includes computing gradients once for each sample (e.g., 1
+epoch = 1 iteration of full gradient, 1 epoch = $N$ iterations of
+stochastic gradient).
 
-{Goal of this section: demonstrate overfitting}
-\begin{itemize}
-\item The goal of supervised machine learning is to get accurate
-  predictions on new/unseen/held-out test data.
-\item Any machine learning algorithm is prone to overfit, which
-  means providing better predictions on the train/subtrain set than
-  on a held-out validation/test set. (BAD)
-\item To learn a model which does NOT overfit (GOOD), you need to
-  first divide your train set into subtrain/validation sets.
-\item Code for figures in this section:
-  \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-overfitting.R}
-\end{itemize}
+In the algorithm above, the number of hidden units $U$, the number of
+iterations $T$, and the step size $\alpha$ must be fixed before
+running the learning algorithm. These \keyword{hyper-parameters}
+affect the learning capacity of the neural network.  An important
+consideration when using any machine learning algorithm is that you
+most likely need to tune the hyper-parameters of the algorithm in
+order to avoid underfitting and overfitting. \keyword{Underfitting}
+occurs when the learned function $f$ neither provides accurate
+predictions for the train data, nor the test
+data. \keyword{Overfitting} occurs when the learned function $f$ only
+provides accurate predictions for the train data (and not for the test
+data). Both underfitting and overfitting are bad, and need to be
+avoided, because the goal of any learning algorithm is to find a
+prediction function $f$ which provides accurate predictions in test
+data.
 
 \begin{figure}
   \centering
@@ -341,239 +356,71 @@ any other problems you encounter in your work) you should
   \label{fig:overfitting-paper}
 \end{figure}
 
-Figure~\ref{fig:overfitting-paper}
+How can we select hyper-parameters which avoid overfitting? Note that
+the choice of hyper-parameters such as number of hidden units $U$ and
+iterations $T$ affect the learned function $f$, so we can not use the
+test data to learn these hyper-parameters (by assumption that the test
+data are not available at train time). Then how do we know which
+hyper-parameters will result in learned functions which best
+generalize to new data?
+
+A general method which can be used with any learning algorithm is
+splitting the train set into subtrain and validation sets, then using
+grid search over hyper-parameter values. The subtrain set is used for
+parameter learning, and the validation set is used for hyper-parameter
+selection. In detail, we first fix a set of hyper-parameters, say
+$U=50$ hidden units and $T=100$ iterations. Then the subtrain set is
+used with these hyper-parameters as input to the learning algorithm,
+which outputs the learned parameter vectors $\mathbf w, \mathbf
+v$. Finally the learned parameters are used to compute predictions
+$f(x)$ for all inputs $x$ in the validation set, and the corresponding
+labels $y$ are used to evaluate the accuracy/error of those
+predictions. The procedure is then repeated for another
+hyper-parameter set, say $U=10$ hidden units with $T=500$
+iterations. In the end we select the hyper-parameter set with minimal
+validation error, and then retrain using the learning algorithm on the
+full train set with those hyper-parameters. A variant of this method
+is to use $K$-fold cross-validation to generate $K$
+subtrain/validation splits, then compute mean validation error over
+the $K$ splits, which typically yields hyper-parameters that result in
+more accurate/generalizable predictions (when compared to
+hyper-parameters selected using a single subtrain/validation
+split). Note that this $K$-fold cross-validation for hyper-parameter
+learning is essentially the same procedure as shown in
+Figure~\ref{fig:cross-validation}, but we split the train set
+into subtrain/validation sets (instead of splitting all data into
+train/test sets as shown in the figure).
+
+For example consider Figure~\ref{fig:overfitting-paper}, which
+demonstrates the effects of under/overfitting in a neural network with
+$U=50$ units, by varying the number of iterations/epochs from $T=1$ to
+1000. In this example $K=4$-fold cross-validation was used, so each
+data point was randomly assigned a fold ID integer from 1 to 4. The
+result for only the first split is shown, so observations assigned
+fold ID=1 are considered the validation set, and other observations
+(folds 2--4) are considered the subtrain set. The data exhibit a
+non-linear sine wave pattern, but the learned function for $T=4$
+iterations/epochs is mostly linear (underfitting, large error on both
+subtrain/validation sets). For $T=512$ iterations/epochs the learned
+function is highly non-linear (overfitting, small error for the
+subtrain set but large error for the validation set). When the error
+rates are plotted as a function of a model complexity hyper-parameter
+such as $T$ (Figure~\ref{fig:overfitting-paper}, right), we see the
+characteristic U shape for the validation error, and the monotonic
+decreasing train error. The hyper-parameter with minimal validation
+error is $T=64$ iterations/epochs; smaller $T$ values underfit or are
+overly regularized, and larger $T$ values overfit or are
+under-regularized.
+
+Overall in this section we have seen how a neural network for
+regression can be trained using gradient descent (for learning
+parameter vectors, given fixed hyper parameters) and
+subtrain/validation splits (for learning hyper-parameter values to
+avoid under/overfitting).
+
+\section{Comparing neural networks for image classification}
 
 
-
-{Three different data sets/patterns}
-\begin{itemize}
-\item We illustrate this using a single input/feature
-  $x\in\mathbb R$.
-\item We use a regression problem with outputs $y\in\mathbb R$.
-\item Goal is to learn a function $f(x)\in\mathbb R$.
-\end{itemize}
-
-
-
-{Illustration of 4-fold cross-validation}
-Randomly assign each observation a fold ID from 1 to 4.
-
-{Illustration of subtrain/validation split}
-\begin{itemize}
-\item For validation fold 1, all observations with that fold ID are
-  considered the validation set.
-\item All other observations are considered the subtrain set.
-\end{itemize}
-
-{How to do this in practice? Use R with an IDE}
-\begin{itemize}
-\item Machine learning model training/evaluation is easy to code in
-  programming languages which support vectors/matrices.
-\item I recommend using R because it has so many useful packages
-  (each one for a different machine learning model/algorithm).
-\item Download R at \url{https://cloud.r-project.org/}
-\item If you already use Emacs (classic text editor), I recommend
-  using R inside Emacs Speaks Statistics, which is a great
-  Interactive Development Environment (IDE) for R
-  \url{http://ess.r-project.org/} Also see my screencasts about ESS,
-  \url{https://www.youtube.com/playlist?list=PLwc48KSH3D1Onsed66FPLywMSIQmAhUYJ}
-\item Otherwise, I recommend using RStudio, which is another popular
-  IDE for R
-  \url{https://rstudio.com/products/rstudio/download}
-\end{itemize}
-
-{CSV data tables for machine learning}
-\begin{itemize}
-\item One row for each observation.
-\item One column for the output/label/y (in regression the label is a real
-  number, in classification the label is a class/category).
-\item The other columns should be inputs/features/X that will be used
-  to predict the corresponding output/label/y.
-\end{itemize}
-  Example:
-  \url{https://raw.githubusercontent.com/tdhock/2020-yiqi-summer-school/master/data_linear.csv}
-\begin{verbatim}
-               x            y
-  1: -1.40694802  0.933196336
-  2: -0.76725660  3.832773444
-  3:  0.43712018  4.202983135
-  4:  2.44924674 13.089055084
-...
-\end{verbatim}
-
-
-{Download CSV data and get file names into R}
-Download a copy of the github repo to get these data sets
-\url{https://github.com/tdhock/2020-yiqi-summer-school/archive/master.zip}
-Set working directory to the downloaded repo:
-\begin{verbatim}
-> setwd("~/teaching/2020-yiqi-summer-school")
-> getwd()
-[1] "/home/tdhock/teaching/2020-yiqi-summer-school"
-\end{verbatim}
-  Get a character vector of CSV data file names:
-\begin{verbatim}
-> csv.vec <- Sys.glob("data_*.csv")
-> csv.vec
-[1] "data_linear.csv"    "data_quadratic.csv"
-[3] "data_sin.csv"      
-\end{verbatim}
-
-{Read each CSV data file into R}
-\begin{verbatim}
-sim.data.list <- list()
-for(csv in csv.vec){
-  pattern <- gsub("data_|.csv", "", csv)
-  sim.dt <-  data.table::fread(csv)
-  set.seed(1) # for reproducibility.
-  fold.vec <- sample(rep(1:4, l=nrow(sim.dt)))
-  sim.data.list[[pattern]] <- data.table::data.table(
-    pattern, sim.dt, fold=factor(fold.vec))
-} # combine into a single data table:
-sim.data <- do.call(rbind, sim.data.list)
-\end{verbatim}
-\begin{itemize}
-\item \texttt{gsub} removes prefix/suffix from CSV file name.
-\item \texttt{data.table::fread} gets CSV data from file into R.
-\item \texttt{set.seed} used to get consistent/reproducible results from the
-  pseudo-random number generator (\texttt{sample}).
-\item \texttt{data.table::fun} means use \texttt{fun} from
-  \texttt{data.table} package, install it via
-  \texttt{install.packages("data.table")}
-\end{itemize}
-
-{Result of reading CSV data into R}
-  Result is:
-\begin{verbatim}
-> sim.data
-     pattern          x          y fold
-  1:  linear -1.4069480  0.9331963    4
-  2:  linear -0.7672566  3.8327734    3
-  3:  linear  0.4371202  4.2029831    1
-  4:  linear  2.4492467 13.0890551    2
-  5:  linear -1.7899084  2.0791987    3
- ---                                   
-296:     sin  1.7838530  4.0502991    1
-297:     sin -0.2683533 -0.1097264    1
-298:     sin -0.5394955 -0.5539398    1
-299:     sin  1.8652215 -0.2262517    4
-300:     sin  0.6295997  8.8124249    4
-\end{verbatim}
-
-{Assign each observation to subtrain/validation set}
-\begin{verbatim}
-validation.fold <- 1
-sim.data[, set := ifelse(
-  fold==validation.fold, "validation", "subtrain")]
-> sim.data
-     pattern          x          y fold        set
-  1:  linear -1.4069480  0.9331963    4   subtrain
-  2:  linear -0.7672566  3.8327734    3   subtrain
-  3:  linear  0.4371202  4.2029831    1 validation
-  4:  linear  2.4492467 13.0890551    2   subtrain
-  5:  linear -1.7899084  2.0791987    3   subtrain
- ---                                              
-296:     sin  1.7838530  4.0502991    1 validation
-297:     sin -0.2683533 -0.1097264    1 validation
-298:     sin -0.5394955 -0.5539398    1 validation
-299:     sin  1.8652215 -0.2262517    4   subtrain
-300:     sin  0.6295997  8.8124249    4   subtrain
-\end{verbatim}
-
-{Neural network with one hidden layer, 20 hidden units}
-  Use for loops to fit different neural network models for each data
-  set and number of iterations. 
-\begin{verbatim}
-maxit.values <- 10^seq(0, 4)
-pattern.values <- c("linear", "quadratic", "sin")
-for(i in maxit.values)for(p in pattern.values){
-  pattern.data <- sim.data[pattern==p]
-  fit <- nnet::nnet(
-    y ~ x,
-    pattern.data[set=="subtrain"],
-    size=20,     #hidden units
-    linout=TRUE, #for regression
-    maxit=i)     #max number of iterations
-...
-\end{verbatim}
-
-  
-{Overfitting}
-\begin{itemize}
-\item Happens when subtrain error/loss decreases but validation error
-  increases (as a function of some hyper-parameter)
-\item Here the hyper-parameter is the number of iterations of
-  gradient descent, and overfitting starts after 10--100 iterations.
-\item To maximize prediction accuracy you need to choose a
-  hyper-parameter with minimal validation error/loss.
-\item This optimal hyper-parameter will depend on the data set.
-\item In this case that means choosing 10 iterations for the linear
-  data set, and 100 iterations for the quadratic/sin data sets.
-\end{itemize}
-
-{Computing subtrain/validation loss curves}
-\begin{verbatim}
-...
-  pattern.data[, pred.y := as.numeric(predict(
-    fit, pattern.data))]
-  loss.dt.list[[paste(pattern, maxit)]] <- data.table(
-    pattern=p, maxit=i, pattern.data[, .(
-      mse=mean((pred.y-y)^2)), by=set])
-}
-loss.dt <- do.call(rbind, loss.dt.list)
-\end{verbatim}
-Result is:  
-\begin{verbatim}
-      pattern        set maxit         mse
- 1:    linear   subtrain     1  17.7785881
- 2:    linear validation     1  23.0575528
-...
-29:       sin   subtrain 10000   0.6970455
-30:       sin validation 10000  19.5051785
-\end{verbatim}
-
-
-{How does the neural network predict/learn?}
-  \begin{eqnarray*}
-    \text{hidden units: }\ h_j &=& \sigma(w_j x + b_j) \\
-    \text{predicted output: }\  \texttt{o} = \hat y &=& \sum_{j=1}^u v_j h_j + \beta
-  \end{eqnarray*}
-  \begin{itemize}
-  \item $x\in\mathbb R$ is the input/feature (\texttt{i1} in R notation below).
-  \item $\sigma:\mathbb R\rightarrow [0,1]$ is the sigmoid activation
-    function, $\sigma(z)=(1+e^{-z})^{-1}$.
-  \item $h_j\in[0,1]$ are $u$ hidden units, e.g. $u\in\{20, 2\}$ (\texttt{h1},\texttt{h2}).
-  \item $w_j,b_j,v_j,\beta\in\mathbb R$ are the weights which are
-    learned using gradient descent to minimize the squared error, e.g. for $u=2$:
-  \end{itemize}
-  Result is:
-\begin{verbatim}
-> coef(fit)
-     b->h1     i1->h1      b->h2     i1->h2 
--40.770433  -2.636863 -20.719333   2.629485 
-      b->o      h1->o      h2->o 
-  4.643852  18.973225  28.348342 
-\end{verbatim}
-
-
-{Comments on other model sizes}
-  \begin{itemize}
-  \item Model with 2 hidden units is less flexible: does not fit the subtrain
-    data as well, and does not overfit as much.
-  \item Model with 200 hidden units is more flexible: fits subtrain
-    data even better, and overfits even more.
-  \item Therefore model size / number of hidden units is also a
-    hyper-parameter that can be used to control overfitting.
-  \item R code is the same, just use \texttt{size=2} or 200 (or even
-    better, I wrote a for loop over size values).
-  \item Conclusion: you need to use a held-out validation set to
-    choose the best values of hyper-parameters (e.g. number of
-    iterations, hidden units).
-  \end{itemize}
-
-% QUIZ 1. purpose of train/subtrain/validation/test
-% sets. 2. overfitting/underfitting. 3. data input format for
-% ML. 4. cross-validation fold ID / test/train sets.
 
 {Image classification}
   \begin{itemize}
@@ -589,7 +436,6 @@ Result is:
     digit.
   \item Want to learn $f$ such that
   \item Code for figures in this section:
-    \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-validation-loss.R}
   \end{itemize}
 
 {Representation of digits in CSV}
@@ -809,6 +655,17 @@ Plot accuracy values (or mean/sd) after learning/testing four times
   these data. (more/less layers, more/less units, completely
   different algorithm such as random forests, boosting, etc)
 \end{itemize}
+
+\section{Additional reading}
+
+Machine learning is a large field of research with many algorithms,
+and there are several useful textbooks that provide overviews from
+various perspectives \citep{Bishop2006, Hastie2009, Wasserman2010,
+  Murphy2013, Goodfellow2016}.
+
+\paragraph{Reproducibility statement.} Code for figures in this
+chapter can be freely downloaded from
+\url{https://github.com/tdhock/2020-yiqi-summer-school}
 
 \bibliographystyle{abbrvnat}
 \bibliography{refs} 
