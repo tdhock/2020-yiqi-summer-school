@@ -51,10 +51,11 @@
 
 % Text in your chapter should be corresponding to the pre-recorded video or the video to be recorded.
 
-\paragraph{Objective.} This chapter introduces basic concepts and
-algorithms from machine learning. The goal is to learn how to use
-cross-validation for training and testing machine learning algorithms,
-and to implement neural networks in R code.
+\paragraph{Objective.} In this chapter we introduce basic concepts and
+algorithms from machine learning. We explain how neural networks can
+be used for regression and classification problems, and how
+cross-validation can be used for training and testing machine learning
+algorithms.
 
 \section{Introduction and applications of machine learning}
 
@@ -86,15 +87,15 @@ a function that can input an image, and output an integer which
 indicates class membership. More precisely, let us consider the MNIST
 and Fashion-MNIST data sets
 (Figure~\ref{fig:drawing-mnist-train-test}), in which each input is
-grayscale image with height and width of 28 pixels
-\citep{LeCun1998,Xiao2017} then we typically represent each input as a
-matrix of real numbers $\mathbf x\in\mathbb R^{28\times 28}$. In both
-the MNIST and Fashion-MNIST data sets each image has a corresponding
-label which is an integer $y\in\{0,1,\dots,9\}$. In the MNIST data set
-each image/label represents a digit, whereas in Fashion-MNIST each
-image/label represents a category of clothing (0 for T-shirt/top, 1
-for Trouser, 2 for Pullover, etc).  In both data sets the goal is to
-learn a function
+grayscale image with height and width of 28 pixels, 
+represented as a matrix of real numbers
+$\mathbf x\in\mathbb R^{28\times 28}$ \citep{LeCun1998,Xiao2017}. In
+both the MNIST and Fashion-MNIST data sets each image has a
+corresponding label which is an integer $y\in\{0,1,\dots,9\}$. In the
+MNIST data set each image/label represents a digit, whereas in
+Fashion-MNIST each image/label represents a category of clothing (0
+for T-shirt/top, 1 for Trouser, 2 for Pullover, etc).  In both data
+sets the goal is to learn a function
 $f:\mathbb R^{28\times 28}\rightarrow \{0,1,\dots, 9\}$ which inputs
 an image $\mathbf x$ and outputs a predicted class $f(\mathbf x)$
 which should ideally be the same as the corresponding label $y$.
@@ -391,26 +392,28 @@ Figure~\ref{fig:cross-validation}, but we split the train set
 into subtrain/validation sets (instead of splitting all data into
 train/test sets as shown in the figure).
 
-For example consider Figure~\ref{fig:overfitting-paper}, which
-demonstrates the effects of under/overfitting in a neural network with
-$U=50$ units, by varying the number of iterations/epochs from $T=1$ to
-1000. In this example $K=4$-fold cross-validation was used, so each
-data point was randomly assigned a fold ID integer from 1 to 4. The
-result for only the first split is shown, so observations assigned
-fold ID=1 are considered the validation set, and other observations
-(folds 2--4) are considered the subtrain set. The data exhibit a
-non-linear sine wave pattern, but the learned function for $T=4$
-iterations/epochs is mostly linear (underfitting, large error on both
-subtrain/validation sets). For $T=512$ iterations/epochs the learned
-function is highly non-linear (overfitting, small error for the
-subtrain set but large error for the validation set). When the error
-rates are plotted as a function of a model complexity hyper-parameter
-such as $T$ (Figure~\ref{fig:overfitting-paper}, right), we see the
-characteristic U shape for the validation error, and the monotonic
-decreasing train error. The hyper-parameter with minimal validation
-error is $T=64$ iterations/epochs; smaller $T$ values underfit or are
-overly regularized, and larger $T$ values overfit or are
-under-regularized.
+For example we simulated some data with a sine wave pattern
+(Figure~\ref{fig:overfitting-paper}), and used the R package
+\texttt{nnet} to fit a neural network with one hidden layer of $U=50$
+units \citep{Ripley2002}. We demonstrate the effects of
+under/overfitting by varying the number of iterations/epochs from
+$T=1$ to 1000. In this example $K=4$-fold cross-validation was used,
+so each data point was randomly assigned a fold ID integer from 1 to
+4. The result for only the first split is shown, so observations
+assigned fold ID=1 are considered the validation set, and other
+observations (folds 2--4) are considered the subtrain set. The data
+exhibit a non-linear sine wave pattern, but the learned function for
+$T=4$ iterations/epochs is mostly linear (underfitting, large error on
+both subtrain/validation sets). For $T=512$ iterations/epochs the
+learned function is highly non-linear (overfitting, small error for
+the subtrain set but large error for the validation set). When the
+error rates are plotted as a function of a model complexity
+hyper-parameter such as $T$ (Figure~\ref{fig:overfitting-paper},
+right), we see the characteristic U shape for the validation error,
+and the monotonic decreasing train error. The hyper-parameter with
+minimal validation error is $T=64$ iterations/epochs; smaller $T$
+values underfit or are overly regularized, and larger $T$ values
+overfit or are under-regularized.
 
 Overall in this section we have seen how a neural network for
 regression can be trained using gradient descent (for learning
@@ -420,241 +423,130 @@ avoid under/overfitting).
 
 \section{Comparing neural networks for image classification}
 
-
-
-{Image classification}
-  \begin{itemize}
-  \item One of the most popular/successful applications of machine
-    learning.
-  \item Input: image file $x\in\mathbb R^{h\times w\times c}$ where
-    $h$ is the height in pixels, $w$ is the width, $c$ is the number
-    of channels, e.g. RGB image $c=3$ channels.
-  \item In this tutorial we use images with $h=w=16$ pixels and $c=1$
-    channel (grayscale, smaller values are darker).
-  \item Output: class/category $y$ (from a finite set).
-  \item In this tutorial there are ten image classes $y\in\{0, 1, \dots, 9\}$, one for each
-    digit.
-  \item Want to learn $f$ such that
-  \item Code for figures in this section:
-  \end{itemize}
-
-{Representation of digits in CSV}
-  \begin{itemize}
-  \item Each image/observation is one row.
-  \item First column is output/label/class to predict.
-  \item Other 256 columns are inputs/features (pixel intensity
-    values).
-  \end{itemize}
-\begin{verbatim}
- 1:  6 -1 -1  ... -1.000 -1.000   -1
- 2:  5 -1 -1  ... -0.671 -0.828   -1
- 3:  4 -1 -1  ... -1.000 -1.000   -1
- 4:  7 -1 -1  ... -1.000 -1.000   -1
- 5:  3 -1 -1  ... -0.883 -1.000   -1
- 6:  6 -1 -1  ... -1.000 -1.000   -1
- 7:  3 -1 -1  ... -1.000 -1.000   -1
- 8:  1 -1 -1  ... -1.000 -1.000   -1
- 9:  0 -1 -1  ... -1.000 -1.000   -1
-10:  1 -1 -1  ... -1.000 -1.000   -1
-11:  7 -1 -1  ... -1.000 -1.000   -1
-12:  0 -1 -1  ... -1.000 -1.000   -1
-\end{verbatim}
-
-{Converting label column to matrix for neural network}
-  This is a ``one hot'' encoding of the class labels.
-\begin{verbatim}
-zip.dt <- data.table::fread("zip.gz")
-zip.y.mat <- keras::to_categorical(zip.dt$V1)
-
-      0 1 2 3 4 5 6 7 8 9
- [1,] 0 0 0 0 0 0 1 0 0 0
- [2,] 0 0 0 0 0 1 0 0 0 0
- [3,] 0 0 0 0 1 0 0 0 0 0
- [4,] 0 0 0 0 0 0 0 1 0 0
- [5,] 0 0 0 1 0 0 0 0 0 0
- [6,] 0 0 0 0 0 0 1 0 0 0
- [7,] 0 0 0 1 0 0 0 0 0 0
- [8,] 0 1 0 0 0 0 0 0 0 0
- [9,] 1 0 0 0 0 0 0 0 0 0
-[10,] 0 1 0 0 0 0 0 0 0 0
-[11,] 0 0 0 0 0 0 0 1 0 0
-[12,] 1 0 0 0 0 0 0 0 0 0
-\end{verbatim}
-
-{Conversion to array for input to neural network}
-Use array function with all columns except first as data.  
-\begin{verbatim}
-zip.size <- 16
-zip.X.array <- array(
-  data = unlist(zip.dt[1:nrow(zip.dt),-1]),
-  dim = c(nrow(zip.dt), zip.size, zip.size, 1))
-\end{verbatim}
-Need to specify dimensions of array:
+In this section we provide a comparison of
+several other neural networks for image classification. In general in
+a neural network with $L-1$ hidden layers we can represent the
+prediction function as the composition of $L$ intermediate $f_l$
+functions, for all layers $l\in\{1,\dots,L\}$:
+\begin{equation}
+  f(\mathbf x) = f_L[\cdots f_1[\mathbf x] ].
+\end{equation}
+Each of the intermediate functions has the same form,
+\begin{equation}
+  f_l(t) = A_l( \mathbf W_l^\intercal t ),
+\end{equation}
+where $A_l$ is an activation function and
+$\mathbf W_l\in\mathbb R^{u_{l}\times u_{l-1}}$ is a weight matrix with
+elements that must be learned based on the data. This model includes
+several hyper-parameters which must be fixed prior to learning the
+neural network weights:
 \begin{itemize}
-\item Observations: same as the number of rows in the CSV table.
-\item Pixels wide: 16.
-\item Pixels high: 16.
-\item Channels: 1 (greyscale image).
+\item The number of layers $L$.
+\item The activation functions $A_l$.
+\item The number of units per layer $u_l$.
+\item The sparsity pattern in the weight matrices $\mathbf W_l$.
 \end{itemize}
+The number of units in the input layer is fixed, $u_0=D$, based on the
+dimension of the inputs $\mathbf x\in\mathbb R^D$. The number of units
+in the output layer $u_L$ is also fixed based on the outputs/labels
+$y$. The numbers of units in the hidden layers ($u_1,\dots,u_{L-1}$)
+are hyper-parameters which control under/overfitting. Increasing the
+numbers of hidden units $u_l$ results in larger weight matrices
+$\mathbf W_l$, which in general means more parameters to learn, and
+larger capacity for fitting complex patterns in the data. The sparsity
+pattern of $\mathbf W_l$ means which entries are forced to be zero;
+this technique is used in ``convolutional'' neural networks for
+avoiding overfitting and reducing training/prediction time. When the
+matrix is not sparse (all entries non-zero), we refer to the layer as
+dense or fully connected.
 
-{Linear model R code}
-\begin{verbatim}
-library(keras)
-linear.model <- keras::keras_model_sequential() %>%
-  keras::layer_flatten(
-    input_shape = c(16, 16, 1)) %>%
-  keras::layer_dense(
-    units = 10,
-    activation = 'softmax')
-\end{verbatim}
-  \begin{itemize}
-  \item First layer must specify shape of inputs (here 16x16x1).
-  \item \texttt{layer\_flatten} converts any shape to a single dimension
-    of units (here 256).
-  \item \texttt{layer\_dense} uses all units in the previous layer to
-    predict each unit in the layer.
-  \item \texttt{units=10} because there are ten possible classes for an output.
-  \item \texttt{activation='softmax'} is required for the last/output layer in
-    multi-class classification problems.
-\end{itemize}
+For example in the previous section we used a neural network for
+regression with one hidden layer, which in this more general notation
+means using $L=2$ intermediate functions; the input dimension is
+$u_0=D=1$, the number of hidden units is $u_1=U=50$, and there is a
+single output $u_2=1$ to predict. The weight matrices are dense/fully connected (no convolution/sparsity), of
+dimension
+$\mathbf W_1\in\mathbb R^{50\times 1}, \mathbf W_2\in\mathbb R^{1
+  \times 50}$. The hidden layer
+activation function $A_1$ used by the R \texttt{nnet} package is the
+logistic sigmoid, $\sigma(t)=1/(1+\exp(-t))$, and the output
+activation for regression (real-valued outputs) is the identity,
+$A_2(t)=t$.
 
-{Keras model compilation}
-\begin{verbatim}
-linear.model %>% keras::compile(
-  loss = keras::loss_categorical_crossentropy,
-  optimizer = keras::optimizer_adadelta(),
-  metrics = c('accuracy')
-)
-\end{verbatim}
-In \texttt{compile} you can specify
-\begin{itemize}
-\item a \texttt{loss} function, which is directly optimized/minimized
-  in each iteration of the gradient descent learning algorithm. 
-  \url{https://keras.io/api/losses/} 
-\item an \texttt{optimizer}, which is the version of gradient descent
-  learning algorithm to use. 
-  \url{https://keras.io/api/optimizers/} 
-\item an evaluation \texttt{metric} to monitor, not directly optimized
-  via gradient descent, but usually more relevant/interpretable for
-  the application (e.g. accuracy is the proportion of correctly
-  predicted labels). \url{https://keras.io/api/metrics/} 
-\end{itemize}
- 
-{Keras model fitting}
-\begin{verbatim}
-linear.model %>% keras::fit(
-  zip.X.array, zip.y.mat,
-  epochs = 50,
-  validation_split = 0.2
-)
-\end{verbatim}
-In \texttt{fit} you can specify
-\begin{itemize}
-\item Train data inputs \texttt{zip.X.array} and outputs
-  \texttt{zip.y.mat} (required).
-\item Number of full passes of gradient descent through the subtrain
-  data (\texttt{epochs}). In each epoch the gradient with respect to
-  each subtrain observation is computed once.
-\item \texttt{validation\_split=0.2} which means to use 80\% subtrain
-  (used for gradient descent parameter updates), 20\% validation (used
-  for hyper-parameter selection). 
-\end{itemize}
+In this section we implement three other neural networks for image
+classification. Using the ``zip.train'' data set of $N=7291$
+handwritten digits \citep{Hastie2009}, each input is a greyscale image
+of $16\times 16$ pixels which means that number of input units is
+$u_0=256$. As in Figure~\ref{fig:drawing-mnist-train-test} (top) there
+are ten output classes, one for each digit. For the activation
+function $A_L$ in the output layer we use the ``softmax'' function
+which results in a score/probability for each of the ten possible
+output classes, so the number of output units is $u_L=10$.
 
-{Sparse (convolutional) model R code}
-\begin{verbatim}
-library(keras)
-conv.model <- keras_model_sequential() %>%
-  layer_conv_2d(
-    input_shape = dim(zip.X.array)[-1],
-    filters = 20,
-    kernel_size = c(3,3),
-    activation = 'relu') %>% 
-  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
-  layer_flatten() %>%
-  layer_dense(units = 100, activation = 'relu') %>% 
-  layer_dense(
-    units = ncol(zip.y.mat), 
-    activation = 'softmax')
-\end{verbatim}
-  \begin{itemize}
-  \item Sparse: few inputs are used to predict each unit in
-    \texttt{layer\_conv\_2d}.
-  \item Exploits structure of image data to make learning
-    easier/faster.
-  \end{itemize}
+The three neural networks that we consider are
+\begin{description}
+\item[linear] $L=1$ intermediate function with 2,570 parameters to
+  learn (linear model, inputs fully connected to outputs, no hidden
+  units/layers).
+\item[dense] $L=9$ intermediate functions with 97,410 parameters to
+  learn (nonlinear model, each hidden layer dense/fully connected with
+  100 units).
+\item[sparse] $L=3$ intermediate functions with 99,310 parameters to
+  learn (nonlinear model, one convolutional/sparse layer followed
+  by two dense/fully connected layers).
+\end{description}
+We defined and trained each neural network using the \texttt{keras} R
+package \citep{Allaire2020}. We used the \texttt{fit} function with
+argument \verb|validation_split=0.2|, which creates a single split (
+80\% subtrain, 20\% validation). We selected the number of epochs
+hyper-parameter by minimizing the validation loss, and we used the
+selected number of epochs to re-train the neural network on the entire
+train set (no subtrain/validation split).
 
-{Dense (fully connected) neural network R code}
-\begin{verbatim}
-library(keras)
-dense.model <- keras_model_sequential() %>%
-  layer_flatten(
-    input_shape = dim(zip.X.array)[-1]) %>%
-  layer_dense(units = 100, activation = 'relu') %>% 
-  layer_dense(units = 100, activation = 'relu') %>% 
-  layer_dense(units = 100, activation = 'relu') %>% 
-  layer_dense(units = 100, activation = 'relu') %>%
-  layer_dense(units = 100, activation = 'relu') %>%
-  layer_dense(units = 100, activation = 'relu') %>% 
-  layer_dense(units = 100, activation = 'relu') %>%   
-  layer_dense(units = 100, activation = 'relu') %>% 
-  layer_dense(
-    units = ncol(zip.y.mat), 
-    activation = 'softmax')
-\end{verbatim}
-
-{4-fold cross-validation for model evaluation}
-  Does the convolutional model provide more accurate predictions on
-  unseen test data? First randomly assign a fold ID to each image/observation,
-  then for each test fold ID from 1 to 4:
-  \begin{itemize}
-  \item Hold out the images/observations with the test fold ID as a
-    test set (not used at all for model training).
-  \item Use the other images/observations to train all three models
-    using \texttt{validation\_split=0.2}.
-  \item Plot the validation loss curve as a function of the number of
-    epochs, and select the number of epochs which minimizes the
-    validation loss (hyper-parameter learning).
-  \item Re-train with \texttt{epochs=}the learned number of epochs and
-    \texttt{validation\_split=0} (all train data used for gradient
-    descent parameter updates).
-  \item Finally compute the prediction accuracy with respect to the
-    held-out test set.
-  \end{itemize}
-Plot accuracy values (or mean/sd) after learning/testing four times
-(one for each test fold).
+We did this entire procedure $K=4$ times, once for each fold/split in
+$K$-fold cross-validation. Note that even though these data have a
+pre-defined split into ``zip.train'' and ``zip.test'' files, we used
+$K$-fold cross-validation on the ``zip.train'' file, yielding $K$
+train/test splits that we used to estimate mean and variance
+of prediction accuracy for these models (the ``zip.test'' file was
+ignored). In each split we used the test set to quantify the
+prediction accuracy of the learned models. It is clear that the test
+accuracy of all three neural networks is significantly larger than the
+baseline model which always predicts the most frequent class in the
+train set (Figure~\ref{fig:test-accuracy}, left); they are clearly
+learning some non-trivial predictive relationship between inputs and
+outputs. Furthermore it is clear that the dense neural network is
+slightly (not significantly) more accurate than the linear model, and
+the sparse/convoluational neural network is significantly more 
+accurate than the others (Figure~\ref{fig:test-accuracy}, right).
 
 \begin{figure}
   \centering
   \includegraphics[width=0.8\textwidth]{figure-test-accuracy-both}
-  \caption{test accuracy values}
+  \caption{Prediction accuracy of functions learned for image classification of handwritten digits. The
+    baseline function always predicts the most frequent class in the
+    train set; other three learned functions are neural
+    networks with different numbers of hidden layers (linear=0, conv=2, dense=8).}
   \label{fig:test-accuracy}
 \end{figure}
- 
-{Accuracy rates for each test fold}
-  \begin{itemize}
-  \item Always a good idea to compare with the trivial baseline model which always
-    predicts the most frequent class in the train set. (ignoring all
-    inputs/features) 
-  \item Here we see that the baseline is much less accurate than the
-    three learned models, so they are clearly learning something non-trivial.
-  \item Code for test accuracy figures:
-    \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-test-accuracy.R}
-  \end{itemize}
 
-{Zoom to learned models}
-\begin{itemize}
-\item Dense neural network slightly more accurate
-  than linear model, convoluational significantly more
-  accurate than others.
-\item Conclusion: convolutional neural network should be preferred
-  for most accurate predictions in these data.
-\item Maybe not the same conclusion in other data sets, with the
-  same models. (always need to do cross-validation experiments to
-  see which model is best in any given data set)
-\item Maybe other models/algorithms would be even more accurate in
-  these data. (more/less layers, more/less units, completely
-  different algorithm such as random forests, boosting, etc)
-\end{itemize}
+Overall from this comparison it is clear that, among these three
+neural networks, the sparse model should be
+preferred for most accurate predictions in this particular ``zip''
+data set. However, we must be careful to not generalize these
+conclusions to other data sets --- even for some other image
+classification data sets such as MNIST
+(Figure~\ref{fig:drawing-mnist-train-test}), the most accurate
+algorithm may be different. For very difficult data sets, it
+may even be the case that these three neural networks are no more accurate
+than the baseline model which always predicts the most frequent class
+in the train set. In general we always need to use computational
+cross-validation experiments to determine which machine learning
+algorithm is most accurate in any given data set. To learn a
+predictive model with maximum prediction accuracy, machine learning
+algorithms other than neural networks should be additionally
+considered (e.g., regularized linear models, decision trees, random
+forests, boosting, support vector machines).
 
 \section{Additional reading}
 
