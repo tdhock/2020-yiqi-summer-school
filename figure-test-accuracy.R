@@ -54,6 +54,18 @@ cv.stats[, text.x := if(Model=="baseline")max+off else min-off, by=Model]
 cv.stats[, hjust := if(Model=="baseline")0 else 1, by=Model]
 some.stats[, panel := pfac("stats")]
 stat.size <- 3
+cv.wide <- dcast(cv.results, test.fold ~ Model, value.var="acc")
+test.dt.list <- list()
+for(larger.i in 3:length(cv.wide)){
+  smaller.i <- larger.i-1
+  test.result <- t.test(
+    cv.wide[[smaller.i]], cv.wide[[larger.i]], "less", paired = TRUE)
+  test.dt.list[[paste(larger.i)]] <- data.table(
+    smaller.Model=mfac(names(cv.wide)[[smaller.i]]),
+    larger.Model=mfac(names(cv.wide)[[larger.i]]),
+    p.value=test.result[["p.value"]])
+}
+test.dt <- do.call(rbind, test.dt.list)
 gg.both <- ggplot()+
   theme_bw()+
   theme(panel.spacing=grid::unit(0, "lines"))+
