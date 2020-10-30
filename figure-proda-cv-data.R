@@ -1,6 +1,7 @@
 library(data.table)
 library(ggplot2)
 library(keras)
+
 ## from https://github.com/rstudio/keras/issues/937
 if(FALSE){
   keras::install_keras(version = "2.1.6", tensorflow = "1.5")
@@ -9,12 +10,6 @@ keras::use_implementation("keras")
 keras::use_backend("tensorflow")
 
 EnvInfo.file <- "Practice session/nau_training_proda/input_data/EnvInfo4NN_SoilGrids.mat"
-if(!file.exists(EnvInfo.file)){
-  download.file("https://drive.google.com/file/d/1hxTpfdKsiPrGWAiIVLate-blIlWhroAO/view?usp=sharing", "nau_training_proda.zip")
-  unzip("nau_training_proda.zip")
-  unlink("nau_training_proda.zip")
-}
-
 EnvInfo <- R.matlab::readMat(EnvInfo.file)[[1]]
 colnames(EnvInfo) <- c(
   'ProfileNum', 'ProfileID', 'MaxDepth', 'LayerNum', 'Lon', 'Lat',
@@ -60,7 +55,7 @@ length(var4nn)
 
 all.finite <- function(x)apply(is.finite(x), 1, all)
 all.mat.list <- list(
-  input=EnvInfo[, var4nn],
+  input=scale(EnvInfo[, var4nn]),
   output=ParaMean)
 keep <- do.call("&", lapply(all.mat.list, all.finite))
 keep.mat.list <- lapply(all.mat.list, function(m)m[keep,])
@@ -136,6 +131,8 @@ arg.list <- expand.grid(
   stringsAsFactors = FALSE)
 
 TrainOne <- function(test.fold, fold.type, out.name, fold.list, keep.mat.list){
+  library(data.table)
+  library(keras)
   exp.mat.list <- with(keep.mat.list, list(
     input=input,
     output=output[, out.name, drop=FALSE]))
@@ -178,13 +175,13 @@ TrainOne <- function(test.fold, fold.type, out.name, fold.list, keep.mat.list){
       batch_size = 64,
       epochs = epochs,
       validation_split = validation_split,
-      verbose=1
+      verbose=0
     )
   }
   valid.model <- compile.model()
   valid.metrics <- fit.metrics(
     valid.model,
-    50,#value from paper: 4800
+    4800,#value from paper: 4800
     0.2)
   best.epochs <- which.min(valid.metrics$metrics$val_loss)
   metrics.dt <- do.call(data.table::data.table, valid.metrics$metrics)
@@ -195,10 +192,64 @@ TrainOne <- function(test.fold, fold.type, out.name, fold.list, keep.mat.list){
   test.mse <- with(set.data.list$test, c(
     NNet=as.numeric(evaluate(refit.model, input, output)),
     baseline=mean( (output - mean.train.labels)^2 )))
+  meta.dt <- data.table(test.fold, fold.type, out.name)
   test.dt <- data.table(
-    test.fold, fold.type, out.name,
+    meta.dt,
     model=names(test.mse),
-    test.mse)
-  list(test=test.dt, train=metrics.dt)
+    test.mse,
+    test.N=length(set.data.list$test$output))
+  list(test=test.dt, train=data.table(meta.dt, metrics.dt))
 }
 
+reg.name <- "registry-norm-4800"
+reg.name <- "registry"
+reg.name <- "registry-norm-100"
+
+unlink(reg.name, recursive = TRUE)
+batchtools::makeRegistry(reg.name)
+batchtools::batchMap(TrainOne, args=arg.list, more.args=list(fold.list=fold.list, keep.mat.list=keep.mat.list))
+
+batchtools::testJob(1)
+
+job.table <- batchtools::getJobTable()
+chunks <- data.frame(job.table, chunk=1)
+batchtools::submitJobs(chunks, resources=list(
+  walltime = 24*60*60,#seconds
+  memory = 2000,#megabytes per cpu
+  ncpus=1,  #>1 for multicore/parallel jobs.
+  ntasks=1, #>1 for MPI jobs.
+  chunks.as.arrayjobs=TRUE))
+
+batchtools::loadRegistry(reg.name)
+
+batchtools::getStatus()
+
+jt <- batchtools::getJobTable()
+jt[!is.na(error)]
+
+result.dt.list <- list()
+for(job.i in 1:nrow(jt)){
+  res.list <- batchtools::loadResult(job.i)
+  for(tab.name in names(res.list)){
+    result.dt.list[[tab.name]][[job.i]] <- res.list[[tab.name]]
+  }
+}
+
+result.dt.list <- list()
+result.rds.vec <- Sys.glob("registry/results/*")
+for(job.i in seq_along(result.rds.vec)){
+  res.list <- readRDS(result.rds.vec[[job.i]])
+  for(tab.name in names(res.list)){
+    result.dt.list[[tab.name]][[job.i]] <- res.list[[tab.name]]
+  }
+}
+
+for(tab.name in names(result.dt.list)){
+  result.dt <- do.call(rbind, result.dt.list[[tab.name]])
+  out.csv <- paste0("figure-proda-cv-data-", tab.name, ".csv")
+  data.table::fwrite(result.dt, out.csv)
+}
+best.dt <- result.dt[, .(
+  best.epochs=which.min(val_loss)
+), by=.(test.fold, fold.type, out.name)]
+best.dt[max(best.epochs)==best.epochs]
