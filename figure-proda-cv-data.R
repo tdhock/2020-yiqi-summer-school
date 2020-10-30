@@ -95,6 +95,17 @@ ggplot()+
     data=fold.dt)+
   coord_quickmap()
 
+gg <- ggplot()+
+  facet_grid(. ~ fold.type, labeller=label_both)+
+  geom_point(aes(
+    Lon, Lat, color=fold),
+    shape=1,
+    data=fold.dt)+
+  coord_quickmap()
+png("figure-proda-cv-data-map.png", width=10, height=3, units="in", res=200)
+print(gg)
+dev.off()
+
 keep.output.tall <- melt(
   keep.dt.list[["output"]],
   measure.vars=names(keep.dt.list[["output"]]))
