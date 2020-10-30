@@ -60,6 +60,24 @@ Supplementary youtube screencasts showing R command line use:
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1MvTf_JOI00_eIPcoeYMM_o][Number of hidden units is a regularization parameter (R keras)]]
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
 
+** 29 Oct 2020
+[[file:figure-proda-cv-data.R]] computes geographic and random folds,
+plots map
+
+[[file:figure-proda-cv-data-map.png]]
+
+it also has batchtools code that computes
+[[file:figure-proda-cv-data-test.csv]]
+
+[[file:figure-proda-cv-data-multitask.R]] computes
+[[file:figure-proda-cv-data-multitask-test.csv]]
+
+Those files are read by [[file:figure-proda-cv.R]] which makes
+
+[[file:figure-proda-cv-some-out.png]] (selected for publication)
+
+[[file:figure-proda-cv-all-out.png]] (all)
+
 ** 27 Oct 2020
 [[file:mnist.tex]] contains figure/captions not used in chapter.
 ** 22 Oct 2020
