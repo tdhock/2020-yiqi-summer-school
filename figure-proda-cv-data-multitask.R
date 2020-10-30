@@ -90,17 +90,6 @@ ggplot()+
     data=fold.dt)+
   coord_quickmap()
 
-gg <- ggplot()+
-  facet_grid(. ~ fold.type, labeller=label_both)+
-  geom_point(aes(
-    Lon, Lat, color=fold),
-    shape=1,
-    data=fold.dt)+
-  coord_quickmap()
-png("figure-proda-cv-data-map.png", width=10, height=3, units="in", res=200)
-print(gg)
-dev.off()
-
 keep.output.tall <- melt(
   keep.dt.list[["output"]],
   measure.vars=names(keep.dt.list[["output"]]))
@@ -127,23 +116,19 @@ ggplot()+
 arg.list <- expand.grid(
   test.fold=unique.folds,
   fold.type=names(fold.list),
-  out.name=colnames(keep.mat.list$output),
   stringsAsFactors = FALSE)
 
-TrainOne <- function(test.fold, fold.type, out.name, fold.list, keep.mat.list){
+TrainOne <- function(test.fold, fold.type, fold.list, keep.mat.list){
   library(data.table)
   library(keras)
-  exp.mat.list <- with(keep.mat.list, list(
-    input=input,
-    output=output[, out.name, drop=FALSE]))
   test.i <- which(apply(fold.list == test.fold, 1, all))
   fold.vec <- fold.list[[fold.type]]
   set.select.list <- list(
     test=test.i,
     train=fold.vec != test.fold)
   set.data.list <- list()
-  for(data.type in names(exp.mat.list)){
-    mat <- exp.mat.list[[data.type]]
+  for(data.type in names(keep.mat.list)){
+    mat <- keep.mat.list[[data.type]]
     for(set.name in names(set.select.list)){
       select.vec <- set.select.list[[set.name]]
       set.data.list[[set.name]][[data.type]] <- mat[select.vec, ]
@@ -153,8 +138,8 @@ TrainOne <- function(test.fold, fold.type, out.name, fold.list, keep.mat.list){
   compile.model <- function(){
     keras_model_sequential() %>%
       layer_dense(
-        units = 256, activation = 'relu',
-        input_shape = ncol(keep.mat.list[["input"]])) %>%
+        input_shape = ncol(keep.mat.list[["input"]]),
+        units = 256, activation = 'relu') %>%
       layer_dropout(0.3) %>%
       layer_dense(units = 512, activation = 'relu') %>%
       layer_dropout(0.5) %>%
@@ -162,7 +147,7 @@ TrainOne <- function(test.fold, fold.type, out.name, fold.list, keep.mat.list){
       layer_dropout(0.5) %>%
       layer_dense(units = 256, activation = 'relu') %>%
       layer_dropout(0.3) %>%
-      layer_dense(units = 1) %>%
+      layer_dense(units = ncol(keep.mat.list[["output"]])) %>%
       compile(
         loss = loss_mean_squared_error,
         optimizer = optimizer_adadelta()
@@ -181,7 +166,7 @@ TrainOne <- function(test.fold, fold.type, out.name, fold.list, keep.mat.list){
   valid.model <- compile.model()
   valid.metrics <- fit.metrics(
     valid.model,
-    4800,#value from paper: 4800
+    100,#value from paper: 4800
     0.2)
   best.epochs <- which.min(valid.metrics$metrics$val_loss)
   metrics.dt <- do.call(data.table::data.table, valid.metrics$metrics)
@@ -189,21 +174,21 @@ TrainOne <- function(test.fold, fold.type, out.name, fold.list, keep.mat.list){
   refit.model <- compile.model()
   refit.metrics <- fit.metrics(refit.model, best.epochs, 0)
   ## compute test accuracy.
-  test.mse <- with(set.data.list$test, c(
-    NNet=as.numeric(evaluate(refit.model, input, output)),
-    baseline=mean( (output - mean.train.labels)^2 )))
-  meta.dt <- data.table(test.fold, fold.type, out.name)
+  test.mse <- with(
+    set.data.list$test, 
+    colMeans( (predict(refit.model, input)-output)^2 )
+  )
+  meta.dt <- data.table(test.fold, fold.type)
   test.dt <- data.table(
     meta.dt,
-    model=names(test.mse),
+    out.name=names(test.mse),
+    model="Multi-task",
     test.mse,
     test.N=length(set.data.list$test$output))
-  list(test=test.dt, train=data.table(meta.dt, metrics.dt))
+  list(test=test.dt, train=data.table(meta.dt, out.name="Multi-task", metrics.dt))
 }
 
-reg.name <- "registry"
-reg.name <- "registry-norm-100"
-reg.name <- "registry-norm-4800"
+reg.name <- "registry-multi-task-100"
 
 unlink(reg.name, recursive = TRUE)
 batchtools::makeRegistry(reg.name)
@@ -246,7 +231,7 @@ for(job.i in seq_along(result.rds.vec)){
 
 for(tab.name in names(result.dt.list)){
   result.dt <- do.call(rbind, result.dt.list[[tab.name]])
-  out.csv <- paste0("figure-proda-cv-data-", tab.name, ".csv")
+  out.csv <- paste0("figure-proda-cv-data-multitask-", tab.name, ".csv")
   data.table::fwrite(result.dt, out.csv)
 }
 best.dt <- result.dt[, .(

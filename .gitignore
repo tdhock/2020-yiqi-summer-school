@@ -1,3 +1,7 @@
+*.zip
+.Rhistory
+__MACOSX
+registry*
 _region_.tex
 mnist.pdf
 README.html
