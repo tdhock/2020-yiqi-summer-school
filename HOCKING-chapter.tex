@@ -132,7 +132,7 @@ explained in the next section.
 \subsection{$K$-fold cross-validation for evaluating prediction/test accuracy}
 
 Each input $\mathbf x$ in a data set is typically represented as one
-of $N$ rows in a design matrix with $D$ columns (one for each
+of $N$ rows in a ``design matrix'' with $D$ columns (one for each
 dimension or feature). Each output $y$ is represented as an element of
 a label vector of size $N$, which can be visualized as another column
 alongside the design matrix (Figure~\ref{fig:cross-validation},
@@ -401,19 +401,24 @@ $T=1$ to 1000. In this example $K=4$-fold cross-validation was used,
 so each data point was randomly assigned a fold ID integer from 1 to
 4. The result for only the first split is shown, so observations
 assigned fold ID=1 are considered the validation set, and other
-observations (folds 2--4) are considered the subtrain set. The data
-exhibit a non-linear sine wave pattern, but the learned function for
-$T=4$ iterations/epochs is mostly linear (underfitting, large error on
-both subtrain/validation sets). For $T=512$ iterations/epochs the
-learned function is highly non-linear (overfitting, small error for
-the subtrain set but large error for the validation set). When the
-error rates are plotted as a function of a model complexity
-hyper-parameter such as $T$ (Figure~\ref{fig:overfitting-paper},
-right), we see the characteristic U shape for the validation error,
-and the monotonic decreasing train error. The hyper-parameter with
-minimal validation error is $T=64$ iterations/epochs; smaller $T$
-values underfit or are overly regularized, and larger $T$ values
-overfit or are under-regularized.
+observations (folds 2--4) are considered the subtrain set (which is
+used at input to the \texttt{nnet} R function which implements the
+gradient descent learning algorithm). We then used the
+\texttt{predict} function in R to compute predictions for subtrain and
+validation data, and analyzed how the prediction error changes as a
+function of the number of iterations/epochs $T$ of gradient
+descent. The data exhibit a non-linear sine wave pattern, but the
+learned function for $T=4$ iterations/epochs is mostly linear
+(underfitting, large error on both subtrain/validation sets). For
+$T=512$ iterations/epochs the learned function is highly non-linear
+(overfitting, small error for the subtrain set but large error for the
+validation set). When the error rates are plotted as a function of a
+model complexity hyper-parameter such as $T$
+(Figure~\ref{fig:overfitting-paper}, right), we see the characteristic
+U shape for the validation error, and the monotonic decreasing train
+error. The hyper-parameter with minimal validation error is $T=64$
+iterations/epochs; smaller $T$ values underfit or are overly
+regularized, and larger $T$ values overfit or are under-regularized.
 
 Overall in this section we have seen how a neural network for
 regression can be trained using gradient descent (for learning
@@ -497,8 +502,8 @@ The three neural networks that we consider are
 \end{description}
 We defined and trained each neural network using the \texttt{keras} R
 package \citep{Allaire2020}. We used the \texttt{fit} function with
-argument \verb|validation_split=0.2|, which creates a single split (
-80\% subtrain, 20\% validation). We selected the number of epochs
+argument \verb|validation_split=0.2|, which creates a single split
+(80\% subtrain, 20\% validation). We selected the number of epochs
 hyper-parameter by minimizing the validation loss, and we used the
 selected number of epochs to re-train the neural network on the entire
 train set (no subtrain/validation split).
@@ -570,20 +575,24 @@ observations, each one a soil sample with $D=60$ input features.
 %   ..- attr(*, "dimnames")=List of 2
 %   .. ..$ : NULL
 %   .. ..$ : chr [1:25] "diffus" "cryo" "q10" "efolding" ...
-There
-are 25 real-valued output variables to predict; each is the value of
-an earth system model parameter at the location of the soil sample. We
-want a neural network that will be able to predict the values of these
-earth system parameters at new locations. \citet{Feng2020} proposed
-using a neural network with $L=4$ fully connected layers and dropout
-regularization for this task (see paper for details). In this section
-the ``multi-task'' model uses the same number of layers/units as
-described in that paper; the term multi-task means that the neural
-network outputs a predicts for all 25 outputs/tasks. For comparison,
-we additionally consider ``single-task'' models with the same number
-of hidden layers/units, but only one output unit. We expect the
-multi-task model to sometimes be more accurate, because of the
-expected correlation between outputs (earth system model parameters).
+There are 25 real-valued output variables to predict; each is the
+value of an earth system model parameter at the location of the soil
+sample. We want a neural network that will be able to predict the
+values of these earth system parameters at new
+locations. \citet{Feng2020} proposed using a neural network with $L=4$
+fully connected layers and dropout regularization for this task (see
+paper for details). In this section the ``multi-task'' model uses the
+same number of layers/units as described in that paper; the term
+multi-task means that the neural network outputs a predicts for all 25
+outputs/tasks. For comparison, we additionally consider
+``single-task'' models with the same number of hidden layers/units,
+but only one output unit. We expect the multi-task model to sometimes
+be more accurate, because of the expected correlation between outputs
+(earth system model parameters). To see whether or not these neural
+networks learn any non-trivial predictive relationship between inputs
+and output, we consider a baseline model which always predicts the
+mean of the train set label/output values (and does not use the inputs
+at all).
 
 \begin{figure}
   \centering
@@ -678,6 +687,37 @@ parameters.
 % data assimilation were used in training and validating the neural
 % network with a validation split ratio of 0.2, and the remaining
 % 20% of the site-by-site data assimilation results were used as the testing set. The number of epochs was set as 4800, and the batch size was 64. After the neural network training and validation, parameter values for soil sites in the testing set were predicted based on the trained neural network and corresponding auxiliary environmental covariates. The predicted parameter values were then assigned into CLM5 to estimate the SOC content distributions at corresponding sites. Moreover, to represent SOC content distributions for the whole conterminous United States, we used the trained neural network and auxiliary environmental covariate masks of the continent at a resolution of 0.5 degrees to propose parameter values at each grid of the map. The map of SOC content for the conterminous United States was generated by applying the neural network based parameterization into CLM5 matrix model.
+
+\section{Quiz questions}
+
+\begin{enumerate}
+\item When using a design matrix to represent machine learning inputs,
+  what does each row and column represent? What other data/options
+  does a supervised learning algorithm such as gradient descent need
+  as input, and what does it yield as output?
+\item When splitting data into train/test sets, what is the purpose of
+  each set? When splitting a train set into subtrain/validation sets,
+  what is the purpose of each set? What is the advantage of using
+  $K$-fold cross-validation, relative to a single split?
+\item In order to determine if any non-trivial predictive relationship
+  between inputs and output has been learned, a comparison with a
+  baseline that ignores the inputs must be used. How do you compute
+  the baseline predictions, for regression and classification
+  problems?
+\item How can you tell if machine learning model predictions are
+  underfitting or overfitting?
+\item When using the \texttt{nnet} function in R to learn a
+  neural network with a single hidden layer, do large or small values
+  of the number of iterations hyper-parameter result in overfitting?
+\item When using the \texttt{nnet} function in R learn a neural
+  network with a single hidden layer, and you do not yet know how many
+  iterations to use, what data set should you use as input to
+  \texttt{nnet}? How should you learn the number of iterations to
+  avoid underfitting and overfitting? After having computed the number
+  of iterations to use, what data set should you then use as input to
+  \texttt{nnet} to learn your final model? Hint: possible choices for
+  set to use are all, train, test, subtrain, validation.
+\end{enumerate}
 
 \section{Additional reading}
 
