@@ -190,7 +190,7 @@ Figure~\ref{fig:test-accuracy}).
   \label{fig:cross-validation}
 \end{figure}
 
-The $K$-fold cross-validation procudure generates $K$ splits, and can
+The $K$-fold cross-validation procedure generates $K$ splits, and can
 therefore be used to estimate both mean and variance of prediction
 accuracy/error. The number of folds/splits $K$ is a user-defined
 integer parameter which must be at least 2, and at most $N$. Typical
@@ -318,13 +318,13 @@ direction,
   \mathbf v_t &=& \mathbf v_{t-1} - \alpha \nabla_{\mathbf v} \mathcal L(\mathbf w_{t-1}, \mathbf v_{t-1}).
 \end{eqnarray}
 The algorithm described above is referred to as ``full gradient''
-because the gradient is defined using the full set of $N$ samples in
-the train set. Other common variants include ``stochastic gradient''
-(gradient uses one sample) and ``minibatch'' (gradient uses several
-samples). When doing gradient descent on a neural network model, one
-``epoch'' includes computing gradients once for each sample (e.g., 1
-epoch = 1 iteration of full gradient, 1 epoch = $N$ iterations of
-stochastic gradient).
+because the gradient descent direction is defined using the full set
+of $N$ samples in the train set. Other common variants include
+``stochastic gradient'' (gradient uses one sample) and ``minibatch''
+(gradient uses several samples). When doing gradient descent on a
+neural network model, one ``epoch'' includes computing gradients once
+for each sample (e.g., 1 epoch = 1 iteration of full gradient, 1 epoch
+= $N$ iterations of stochastic gradient).
 
 In the algorithm above, the number of hidden units $U$, the number of
 iterations $T$, and the step size $\alpha$ must be fixed before
