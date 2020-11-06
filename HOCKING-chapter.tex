@@ -279,13 +279,20 @@ this as a regression problem.
 
 \section{Avoiding under/overfitting in a neural network for regression}
 
-Now we consider a simple regression problem for which the input
+In this section we begin by explaining the prediction function and
+learning algorithm for a simple neural network. We then demonstrate
+how the number of iterations of the learning algorithm can be selected
+using a validation set, in order to avoid underfitting and
+overfitting. 
+
+We consider a simple regression problem for which the input
 $x\in\mathbb R$ is a single real number ($D=1$ feature/column in the
 design matrix), and the output $y\in\mathbb R$ is as well. Using a
 neural network with a single hidden layer of $U$ units, there are two
-unknown \keyword{parameter} vectors which need to be learned using the training
-data, $\mathbf w\in \mathbb R^U$ and $\mathbf v\in \mathbb R^U$. The prediction
-function $f$ is then defined as
+unknown \keyword{parameter} vectors which need to be learned using the
+training data, $\mathbf w\in \mathbb R^U$ and
+$\mathbf v\in \mathbb R^U$. The prediction function $f$ is then
+defined as
 \begin{equation}
   f(x) = \mathbf w^\intercal \sigma( x \mathbf v ) = \mathbf w^\intercal \mathbf z,
 \end{equation}
@@ -307,8 +314,8 @@ then at each iteration $t\in\{1,\dots, T\}$ the parameters are
 improved by taking a step of size $\alpha>0$ in the negative gradient
 direction,
 \begin{eqnarray}
-  \mathbf w_t &=& \mathbf w_{t-1} - \alpha \nabla_{\mathbf w} \mathcal L(\mathbf w, \mathbf v),\\
-  \mathbf v_t &=& \mathbf v_{t-1} - \alpha \nabla_{\mathbf v} \mathcal L(\mathbf w, \mathbf v).
+  \mathbf w_t &=& \mathbf w_{t-1} - \alpha \nabla_{\mathbf w} \mathcal L(\mathbf w_{t-1}, \mathbf v_{t-1}),\\
+  \mathbf v_t &=& \mathbf v_{t-1} - \alpha \nabla_{\mathbf v} \mathcal L(\mathbf w_{t-1}, \mathbf v_{t-1}).
 \end{eqnarray}
 The algorithm described above is referred to as ``full gradient''
 because the gradient is defined using the full set of $N$ samples in
