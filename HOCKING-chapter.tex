@@ -606,12 +606,14 @@ at all).
   \includegraphics[width=0.9\textwidth]{figure-proda-cv-data-map}
 
   \includegraphics[width=0.9\textwidth]{figure-proda-cv-some-out}
-    
-  \caption{Cross-validation for predicting earth system model
+    \vskip -0.5cm
+  \caption{Cross-validation for estimating error rates of machine
+    learning algorithms that predict earth system model
     parameters. \textbf{Top:} fold IDs were assigned to each
     observation using longitude (left) or randomly
     (right). \textbf{Bottom:} prediction error for four of the 25
-    outputs.}
+    outputs. Please see \citep{Feng2020} for meanings of abbreviations
+    (cryo, maxpsi, tau4s3, fs2s3). }
   \label{fig:proda-cv}
 \end{figure}
 
@@ -667,6 +669,21 @@ correlations between outputs. Overall this comparison has shown how
 cross-validation can be used to quantitatively evaluate and compare
 machine learning algorithms for predicting earth system model 
 parameters.
+
+%% TODO I am curious if you can add one or two sentences at the end of
+%% section 4 to link your chapter to the practice in unit 10 on neural
+%% network.
+In comparison to the neural network practice in unit 10, the main
+difference is that here we discussed how held-out test sets can be
+used to estimate prediction accuracy/error rates of learning
+algorithms. Unit 10 discusses how a validation set can be used to
+avoid overfitting, as we have done in this chapter as well. We have
+additionally discussed how $K=5$ fold cross-validation can be used to
+generate several train/test splits, which can be used to estimate
+prediction error rates for each fold/data/algorithm combination (e.g.,
+Figure~\ref{fig:proda-cv}, bottom). This technique is useful since it
+allows us to see which algorithms are significantly more/less accurate
+than others on given data sets.
 
 % Neural Networking Method
 
