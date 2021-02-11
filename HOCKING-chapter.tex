@@ -162,7 +162,7 @@ can only report accuracy/error metrics with respect to one test set
 91.3\% of observations/labels in the test set, meaning 8.7\% error
 rate). 
 
-In addition to estimating the accuracy/error rate, is important to
+In addition to estimating the accuracy/error rate, it is important to
 have some estimate of variance in order to make statements about
 whether the prediction accuracy/error of the learned function $f$ is
 significantly larger/smaller than other prediction functions. The
@@ -224,8 +224,7 @@ the ``conv'' function, $99.3 \pm 1.1 \%$. We can therefore conclude
 that the most accurate learning algorithm for this problem, among
 these four candidates, is the ``conv'' method (which uses a
 convolutional neural network, explained later).  It is important to
-note that statements about what algorithm is most accurate only makes
-sense in terms of a particular data set, after having performed
+note that statements about what algorithm is most accurate can only be made for a particular data set, after having performed
 $K$-fold cross-validation to estimate prediction accuracy/error rates.
 
 \subsection{Other applications}
@@ -590,7 +589,7 @@ locations. \citet{Feng2020} proposed using a neural network with $L=4$
 fully connected layers and dropout regularization for this task (see
 paper for details). In this section the ``multi-task'' model uses the
 same number of layers/units as described in that paper; the term
-multi-task means that the neural network outputs a predicts for all 25
+multi-task means that the neural network outputs a prediction for all 25
 outputs/tasks. For comparison, we additionally consider
 ``single-task'' models with the same number of hidden layers/units,
 but only one output unit. We expect the multi-task model to sometimes
@@ -654,8 +653,7 @@ predictions (using a maximum of 100 epochs, and a single 80\% subtrain
 20\% validation split to choose the optimal number of epochs for
 re-training on the entire train set). For each fold/model/output we
 computed mean squared error with respect to the test set, and we plot
-these values for four of the 25 outputs in Figure~\ref{fig:proda-cv}
-(bottom). It is clear that some outputs are more difficult to predict
+these values for four of the 25 outputs (Figure~\ref{fig:proda-cv}, bottom). It is clear that some outputs are more difficult to predict
 than others; for cryo and maxpsi outputs the neural networks show
 little or no improvement over baselines, whereas for tau4s3 and fs2s3
 outputs we observed substantial improvements over baselines. As
@@ -732,7 +730,7 @@ than others on given data sets.
   underfitting or overfitting?
 \item When using the \texttt{nnet} function in R to learn a
   neural network with a single hidden layer, do large or small values
-  of the number of iterations hyper-parameter result in overfitting?
+  of the number of iterations hyper-parameter result in overfitting? Why?
 \item When using the \texttt{nnet} function in R learn a neural
   network with a single hidden layer, and you do not yet know how many
   iterations to use, what data set should you use as input to
