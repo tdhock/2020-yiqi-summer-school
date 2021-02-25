@@ -630,6 +630,18 @@ loss.dt <- do.call(rbind, loss.dt.list)
 \end{frame}
 
 \begin{frame}
+  \frametitle{Average validation error over four splits}
+
+  \includegraphics[width=\textwidth]{figure-overfitting-cv-data-median-mse-3.png}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Final models fit to entire train set using best hyper-parameters}
+
+  \includegraphics[width=\textwidth]{figure-overfitting-cv-data-test-fold-3-pred.png}
+\end{frame}
+
+\begin{frame}
   \frametitle{Finally compare test error across all train/test splits}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data.png}
