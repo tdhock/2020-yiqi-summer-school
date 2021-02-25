@@ -1,12 +1,5 @@
 library(data.table)
 library(ggplot2)
-library(keras)
-## from https://github.com/rstudio/keras/issues/937
-if(FALSE){
-  keras::install_keras(version = "2.1.6", tensorflow = "1.5")
-}
-keras::use_implementation("keras")
-keras::use_backend("tensorflow")
 
 n.folds <- 4
 unique.folds <- 1:n.folds
@@ -125,18 +118,46 @@ ggplot()+
   theme(panel.spacing=grid::unit(0, "lines"))+
   facet_grid(hidden.units ~ pattern, labeller=label_both, scales="free")
 
-ggplot()+
-  geom_point(aes(
-    maxit, mse, color=factor(hidden.units), shape=loss),
-    data=nnet.min.dt)+
+units.colors <- c(
+  ##"#F7FBFF", "#DEEBF7", "#C6DBEF",
+  ##"#9ECAE1",
+  "2"="#6BAED6", #"#4292C6", 
+  "20"="#2171B5", #"#08519C",
+  "200"="#08306B")
+(valid.only <- nnet.loss.dt[set=="validation"])
+(valid.only.min <- valid.only[, .SD[which.min(mse)], by=pattern])
+valid.only[, hidden.units.fac := factor(hidden.units)]
+gg <- ggplot()+
   geom_line(aes(
-    maxit, mse, color=factor(hidden.units)),
-    data=nnet.loss.dt[set=="validation"])+
-  scale_x_log10()+
-  scale_y_log10()+
+    maxit, mse, color=hidden.units.fac),
+    size=1,
+    data=valid.only)+
+  directlabels::geom_dl(aes(
+    maxit, mse),
+    method="bottom.polygons",
+    label="min",
+    color="white",
+    data=valid.only.min)+
+  geom_point(aes(
+    maxit, mse),
+      fill="white",
+      shape=21,
+    data=valid.only.min)+
+  scale_color_manual("hidden\nunits", values=units.colors)+
+  scale_x_log10(
+    "Maximum number of iterations/epochs in gradient descent learning algorithm",
+    limits=valid.only[, c(min(maxit), max(maxit)*5)])+
+  scale_y_log10(
+    "Mean squared error (one validation set)",
+    limits=c(1, max(valid.only$mse))
+    )+
   theme_bw()+
   theme(panel.spacing=grid::unit(0, "lines"))+
-  facet_grid(pattern ~ ., labeller=label_both, scales="free")
+  facet_grid(. ~ pattern, labeller=label_both)
+dl <- directlabels::direct.label(gg, "right.polygons")
+png("figure-overfitting-validation-only.png", width=7, height=3, units="in", res=200)
+print(dl)
+dev.off()
 
 for(units in hidden.units.vec){
   slides.list <- list()

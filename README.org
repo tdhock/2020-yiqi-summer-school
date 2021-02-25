@@ -60,6 +60,33 @@ Supplementary youtube screencasts showing R command line use:
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1MvTf_JOI00_eIPcoeYMM_o][Number of hidden units is a regularization parameter (R keras)]]
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
 
+** 24 Feb 2021
+
+New [[file:figure-overfitting-cv-data.R]] makes lots of figures showing
+difference between train/test/subtrain/validation sets:
+
+[[file:figure-overfitting-cv-data-test-fold-1.png]]
+
+[[file:figure-overfitting-cv-data-inner-folds-1.png]]
+
+[[file:figure-overfitting-cv-data-inner-folds-1-1.png]]
+
+[[file:figure-overfitting-cv-data-median-mse-1.png]]
+
+[[file:figure-overfitting-cv-data-test-fold-1-pred.png]]
+
+[[file:figure-overfitting-cv-data.png]]
+
+[[file:figure-overfitting.R]] also makes
+
+[[file:figure-overfitting-validation-only.png]]
+
+Figure from
+[[https://raw.githubusercontent.com/mlr-org/mlr3book/main/bookdown/images/nested_resampling.png]]
+revised to "subtrain" and "validation" sets.
+
+[[file:nested_resampling.png]] 
+
 ** 29 Oct 2020
 [[file:figure-proda-cv-data.R]] computes geographic and random folds,
 plots map
