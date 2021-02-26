@@ -215,8 +215,7 @@ f(\includegraphics[width=0.5\textwidth]{retinal-scans/national-geographic-medici
 
 \end{frame}
 
-\section{Demonstration of overfitting in regression /
-  first steps with R}
+\section{Demonstrating and avoiding overfitting in regression}
  
 \begin{frame}
   \frametitle{Machine learning algorithms in practice}
@@ -547,10 +546,30 @@ loss.dt <- do.call(rbind, loss.dt.list)
   
 \end{frame}
 
+\section{Inner and outer cross-validation}
+
+\begin{frame}
+  \frametitle{Machine learning algorithms in practice}
+
+  \begin{itemize}
+  \item Last section: we saw how to split the train set into
+    subtrain/validation sets in order to tune hyper-parameters.
+  \item This section: we use K-fold Cross-Validation to repeatedly
+    divide the observations into train/test sets. Use the train set to
+    learn machine learning model parameters, and use the test set to
+    estimate prediction error. Important if you want to demonstrate
+    that your algorithm is learning (providing accurate preditions on
+    new/test data), and comparing different algorithms.
+  \end{itemize}
+  
+\end{frame}
+
 \begin{frame}
   \frametitle{Inner and outer cross-validation}
 
   \includegraphics[width=\textwidth]{nested_resampling}
+
+  {\scriptsize Source: \url{https://raw.githubusercontent.com/mlr-org/mlr3book/main/bookdown/images/nested_resampling.png}}
   
 \end{frame}
 
@@ -576,13 +595,13 @@ loss.dt <- do.call(rbind, loss.dt.list)
 \end{frame}
 
 \begin{frame}
-  \frametitle{Fix one inner fold = one subtrain/validation split}
+  \frametitle{Fix inner fold=1, subtrain/validation split}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-inner-folds-1-1.png}  
 \end{frame}
 
 \begin{frame}
-  \frametitle{Another subtrain/validation split}
+  \frametitle{Inner fold=2, another subtrain/validation split}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-inner-folds-1-2.png}
 \end{frame}
@@ -594,57 +613,66 @@ loss.dt <- do.call(rbind, loss.dt.list)
 \end{frame}
 
 \begin{frame}
-  \frametitle{Average validation error over four splits}
+  \frametitle{Average validation error over four splits (outer fold 1)}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-median-mse-1.png}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Final models fit to entire train set using best hyper-parameters}
+  \frametitle{Final models fit to entire train set using best hyper-parameters (outer fold 1)}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-test-fold-1-pred.png}
+
+  Baseline featureless algorithm: ignore input $x$, always predict the
+  mean of train labels.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Fix one inner fold = one subtrain/validation split}
+  \frametitle{Fix inner fold=1, one subtrain/validation split}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-inner-folds-2-1.png}  
 \end{frame}
 
 \begin{frame}
-  \frametitle{Another subtrain/validation split}
+  \frametitle{Inner fold=2, another subtrain/validation split}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-inner-folds-2-2.png}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Average validation error over four splits}
+  \frametitle{Average validation error over four splits (outer fold 2)}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-median-mse-2.png}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Final models fit to entire train set using best hyper-parameters}
+  \frametitle{Final models fit to entire train set using best hyper-parameters (outer fold 2)}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-test-fold-2-pred.png}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Average validation error over four splits}
+  \frametitle{Average validation error over four splits (outer fold 3)}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-median-mse-3.png}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Final models fit to entire train set using best hyper-parameters}
+  \frametitle{Final models fit to entire train set using best hyper-parameters (outer fold 3)}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data-test-fold-3-pred.png}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Finally compare test error across all train/test splits}
+  \frametitle{Finally compare test error across all outer folds (train/test splits)}
 
   \includegraphics[width=\textwidth]{figure-overfitting-cv-data.png}
+
+  Test error for nnet algorithm consistently smaller than featureless
+  algorithm across all three test folds. This demonstrates that the
+  algorithm is learning some non-trivial predictive relationship
+  between inputs and outputs. Q: will this always be the case? In what
+  kinds of data would it NOT be the case?
 \end{frame}
 
 

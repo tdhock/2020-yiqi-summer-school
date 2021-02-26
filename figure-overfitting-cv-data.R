@@ -43,7 +43,7 @@ dev.off()
 
 test.loss.dt.list <- list()
 hidden.units.vec <- c(2, 20, 200)
-maxit.vec <- 10^seq(0, 3)
+(maxit.vec <- as.integer(10^seq(0, 3, by=0.5)))
 for(test.fold in unique.outer.folds){
   sim.data[, outer.set := ifelse(outer.fold==test.fold, "test", "train")]
   sim.data[, outer.folds := ifelse(

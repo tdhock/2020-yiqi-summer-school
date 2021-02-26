@@ -133,9 +133,9 @@ gg <- ggplot()+
     size=1,
     data=valid.only)+
   directlabels::geom_dl(aes(
-    maxit, mse),
-    method="bottom.polygons",
-    label="min",
+    maxit, mse, label=sprintf(
+      "min maxit=%d\nunits=%d", maxit, hidden.units)),
+    method=list(cex=0.8, "bottom.polygons"),
     color="white",
     data=valid.only.min)+
   geom_point(aes(
