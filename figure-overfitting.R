@@ -62,6 +62,7 @@ dev.off()
 
 nnet.pred.dt.list <- list()
 nnet.loss.dt.list <- list()
+nnet.err.dt.list <- list()
 hidden.units.vec <- c(2, 20, 200)
 maxit.vec <- 10^seq(0, 4)
 for(pattern in unique(sim.data$pattern)){
@@ -87,7 +88,16 @@ for(pattern in unique(sim.data$pattern)){
         skip=skip,
         linout=TRUE,
         maxit=maxit)
-      pred.x <- sort(c(sim.data$x, seq(min(sim.data$x), max(sim.data$x), l=200)))
+      pred.x <- unique(sort(c(
+        sim.data$x,
+        seq(min(sim.data$x), max(sim.data$x), l=200)
+      )))
+      for(set in names(set.data)){
+        set.err.dt <- with(set.data[[set]], data.table(
+          x, y, pred.y=as.numeric(predict(fit, data.frame(x)))))
+        nnet.err.dt.list[[paste(pattern, hidden.units, maxit, set)]] <-
+          data.table(pattern, hidden.units, maxit, set, set.err.dt)
+      }
       nnet.pred.dt.list[[paste(pattern, hidden.units, maxit)]] <- data.table(
         pattern, hidden.units, maxit,
         x=pred.x,
@@ -101,6 +111,8 @@ for(pattern in unique(sim.data$pattern)){
 }#for(pattern)
 nnet.pred.dt <- do.call(rbind, nnet.pred.dt.list)
 nnet.loss.dt <- do.call(rbind, nnet.loss.dt.list)
+folds.info <- unique(sim.data[, .(set, folds)])
+nnet.err.dt <- do.call(rbind, nnet.err.dt.list)[folds.info, on="set"]
 
 nnet.min.dt <- nnet.loss.dt[
 set=="validation", .SD[which.min(mse)], by=.(hidden.units, set, pattern)]
@@ -162,13 +174,27 @@ dev.off()
 for(units in hidden.units.vec){
   slides.list <- list()
   for(it in maxit.vec){
-    gg <- sets.gg+
+    gg <- ggplot()+
       ggtitle(paste(
         "Neural network,",
         units,
         "hidden units,",
         it,
         "gradient descent iterations"))+
+      theme_bw()+
+      theme(panel.spacing=grid::unit(0, "lines"))+
+      facet_grid(set + folds ~ pattern, labeller=label_both)+ 
+      geom_point(aes(
+        x, y),
+        shape=1,
+        color="grey50",
+        data=sim.data)+
+      geom_segment(aes(
+        x, y,
+        xend=x, yend=pred.y),
+        data=nnet.err.dt[maxit==it & hidden.units==units])+
+      xlab("input/feature x")+
+      ylab("output/label y")+
       geom_line(aes(
         x, pred.y),
         color="red",
@@ -178,7 +204,7 @@ for(units in hidden.units.vec){
       "figure-overfitting-pred-units=%d-maxit=%d.png", units, it)
     print(out.png)
     png(out.png,
-        width=7, height=3, units="in", res=200)
+        width=7, height=5, units="in", res=200)
     print(gg)
     dev.off()
     slides.list[[length(slides.list)+1]] <- out.png
