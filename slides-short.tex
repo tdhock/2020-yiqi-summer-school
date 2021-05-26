@@ -582,27 +582,23 @@ dense.model <- keras_model_sequential() %>%
 \end{frame}
 
 \begin{frame}
-  \frametitle{4-fold cross-validation for model evaluation}
-  Does the convolutional model provide more accurate predictions on
-  unseen test data? First randomly assign a fold ID to each image/observation,
-  then for each test fold ID from 1 to 4:
+  \frametitle{K-fold cross-validation for model evaluation}
+  Is convolutional more accurate on unseen test data?
+  
+  \includegraphics[width=\textwidth]{drawing-cross-validation}
+  
   \begin{itemize}
-  \item Hold out the images/observations with the test fold ID as a
-    test set (not used at all for model training).
-  \item Use the other images/observations to train all three models
-    using \texttt{validation\_split=0.2}.
-  \item Plot the validation loss curve as a function of the number of
-    epochs, and select the number of epochs which minimizes the
-    validation loss (hyper-parameter learning).
-  \item Re-train with \texttt{epochs=}the learned number of epochs and
-    \texttt{validation\_split=0} (all train data used for gradient
-    descent parameter updates).
-  \item Finally compute the prediction accuracy with respect to the
-    held-out test set.
+  \item Randomly assign a fold ID from 1 to K to each observation.
+  \item Hold out the observations with the Split ID.
+  \item Use the other observations as the train set.
+  \item Run learning algorithm on train set (including hyper-parmeter
+    selection), outputs learned function (f1-f3).
+  \item Finally compute and plot the prediction accuracy (A1-A3) with
+    respect to the held-out test set.
   \end{itemize}
-  Plot accuracy values (or mean/sd) after learning/testing four times
-  (one for each test fold).
 \end{frame}
+
+
  
 \begin{frame}
   \frametitle{Accuracy rates for each test fold}
