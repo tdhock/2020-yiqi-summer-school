@@ -47,6 +47,8 @@ colnames(ParaMean) <- c(
   'fs2s1', 'fs2s3', 'fs3s1', 'fcwdl2', 'ins', 'beta', 'p4ll', 'p4ml',
   'p4cl', 'maxpsi')
 
+shown.outputs <- c("cryo", "maxpsi", "tau4s3", "fs2s3")
+
 ## But in the original paper, I did not used all the environmental
 ## variables in EnvInfo4NN_SoilGrids.mat to train the NN. Only 60
 ## variables were used (line 146 to 164 in nn_clm_cen.py).
@@ -62,6 +64,11 @@ keep.mat.list <- lapply(all.mat.list, function(m)m[keep,])
 keep.dt.list <- lapply(keep.mat.list, data.table)
 keep.EnvInfo <- data.table(EnvInfo[keep,])
 sapply(keep.mat.list, function(m)mean(is.finite(m)))
+
+head(keep.mat.list$output[, shown.outputs])
+
+show.inputs <- c("Lat", "Lon", "Climate", "Soil_Type", "Veg_Cover")
+head(keep.EnvInfo[, show.inputs, with=FALSE])
 
 n.folds <- 5
 unique.folds <- 1:n.folds

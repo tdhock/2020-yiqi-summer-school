@@ -589,7 +589,7 @@ dense.model <- keras_model_sequential() %>%
   
   \begin{itemize}
   \item Randomly assign a fold ID from 1 to K to each observation.
-  \item Hold out the observations with the Split ID.
+  \item Hold out the observations with the Split ID as test set.
   \item Use the other observations as the train set.
   \item Run learning algorithm on train set (including hyper-parmeter
     selection), outputs learned function (f1-f3).
@@ -609,7 +609,7 @@ dense.model <- keras_model_sequential() %>%
     predicts the most frequent class in the train set. (ignoring all
     inputs/features) 
   \item Here we see that the baseline is much less accurate than the
-    three learned models, so they are clearly learning something non-trivial.
+    three learned models, which are clearly learning something non-trivial.
   \item Code for test accuracy figures:
     \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-test-accuracy.R}
   \end{itemize}
@@ -620,7 +620,7 @@ dense.model <- keras_model_sequential() %>%
   \includegraphics[width=\textwidth]{figure-test-accuracy}
   \begin{itemize}
   \item Dense neural network slightly more accurate
-    than linear model, convoluational significantly more
+    than linear model, convolutional significantly more
     accurate than others.
   \item Conclusion: convolutional neural network should be preferred
     for most accurate predictions in these data.
@@ -635,17 +635,108 @@ dense.model <- keras_model_sequential() %>%
 
 \section{Problem 3: predicting earth system model parameters}
 
-\begin{frame}
+\begin{frame}[fragile]
   \frametitle{Problem setting}
-  TODO
+  Data from: F. Tao, Z. Zhou, Y. Huang, Q. Li, X. Lu, S. Ma, X. Huang,
+  Y. Liang, G. Hugelius, L. Jiang, R. Doughty, Z. Ren, and
+  Y. Luo. Deep learning optimizes data-driven representation of soil
+  organic carbon in earth system model over the conterminous United
+  States. Frontiers in Big Data, 3:17, 2020.
+
+  \centering
+  \includegraphics[width=0.7\textwidth]{figure-proda-inputs}
+
+  Soil vertical profile data gathered at shown sites, and used to
+  fit an earth system model.
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Inputs}
+  Each site (row) has the following environmental features (columns):
+\begin{verbatim}
+        Lat       Lon Climate Soil_Type Veg_Cover ...
+1: 47.24611 -111.0525       2        11        10
+2: 47.68296 -111.2014       2        11        10
+3: 45.35806 -116.8119       3        11        10
+4: 46.73885 -102.7589       4        11        12
+5: 47.65490 -111.5828       2        11        10
+6: 48.49139 -109.8028       2        11        10
+...
+\end{verbatim}
+  
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Outputs}
+  We have fit an earth system model, which has the following
+  parameters (columns) at each site (rows):
+\begin{verbatim}
+          cryo    maxpsi     tau4s3     fs2s3
+[1,] 0.5559403 0.4472416 0.04058302 0.4105497
+[2,] 0.4982079 0.5201390 0.19487388 0.3721377
+[3,] 0.4878875 0.4155263 0.30624590 0.4009429
+[4,] 0.4976373 0.4327989 0.25603125 0.1208804
+[5,] 0.4469068 0.4972995 0.41847923 0.1809647
+[6,] 0.4836617 0.4874783 0.17804971 0.2925210
+...
+\end{verbatim}
+  
 \end{frame}
 
 \begin{frame}
-  \frametitle{Results}
+  \frametitle{Problem statement}
+  To what extent can we predict the earth system model parameters at a
+  new site, assuming we have the environmental features / inputs
+  available?
+  \begin{itemize}
+  \item Cross-validation splits data into train and test sets.
+  \item Neural network learning algorithm run on train set.
+  \item Predictions and accuracy/loss computed on test set.
+\end{itemize}
+
+    \centering
+    \includegraphics[width=\textwidth]{drawing-cross-validation}
+    
+  
+  \end{frame}
+
+  \begin{frame}[fragile]
+    \frametitle{Neural network architecture taken from paper}
+\begin{verbatim}
+    keras_model_sequential() %>%
+      layer_dense(
+        units = 256, activation = 'relu',
+        input_shape = ncol(keep.mat.list[["input"]])) %>%
+      layer_dropout(0.3) %>%
+      layer_dense(units = 512, activation = 'relu') %>%
+      layer_dropout(0.5) %>%
+      layer_dense(units = 512, activation = 'relu') %>%
+      layer_dropout(0.5) %>%
+      layer_dense(units = 256, activation = 'relu') %>%
+      layer_dropout(0.3) %>%
+      layer_dense(units = 1 OR 25) %>%
+      compile(
+        loss = loss_mean_squared_error,
+        optimizer = optimizer_adadelta()
+      )
+\end{verbatim}
+  \end{frame}
+
+\begin{frame}
+  \frametitle{Neural networks often more accurate than baseline }
   \centering
   \includegraphics[width=0.9\textwidth]{figure-proda-cv-data-map}
 
   \includegraphics[width=0.9\textwidth]{figure-proda-cv-some-out}
+
+  \begin{description}
+  \item[Multi-task:] single neural network which predicts all 25 outputs.
+  \item[Single-task:] 25 neural networks, each trained seperately to
+    predict a single output.
+  \item[baseline:] always predict the mean of the labels/outputs in
+    the train set (ignores inputs/features).
+  \end{description}
   
 \end{frame}
  
