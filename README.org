@@ -1,6 +1,14 @@
-Tutorial: introduction to machine learning and neural networks
+Tutorial: introduction to machine learning and neural networks, with
+an application to earth system modeling
 
-Prepared for the summer school, [[http://www2.nau.edu/luo-lab/?workshop][New Advances in Land Carbon Cycle
+* Prepared for the summer school 4th year, 2021
+
+- Summer school link: [[http://www2.nau.edu/luo-lab/?workshop][New Advances in Land Carbon Cycle Modeling]].
+- My [[https://youtu.be/c21etYEb-tE][Video on youtube]].
+- My [[raw/master/slides-short.pdf][Slides PDF]].
+- My [[https://forms.office.com/Pages/ResponsePage.aspx?id=n57UJ-GJoEqZo9NbV7K6A4W5m6WiFvFJkzgC_Y4KHq9UQkJTRjBVS1A5TDJBSkc5OUxKSDJEVkM3OC4u][Quiz]].
+
+* Prepared for the summer school, [[http://www2.nau.edu/luo-lab/?workshop][New Advances in Land Carbon Cycle
 Modeling (3rd year, 2020)]].
 
 ** Tutorial lectures and questions

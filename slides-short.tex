@@ -40,7 +40,7 @@
 
 \begin{document}
 
-\title{Introduction to machine learning and neural networks}
+\title{Introduction to machine learning and neural networks, with an application to earth system modeling}
 
 \author{
   Toby Dylan Hocking\\
@@ -57,10 +57,10 @@
   ML is all about learning predictive functions $f(x)\approx y$, where 
   \begin{itemize}
   \item Inputs/features $x$ can be easily computed using traditional
-    algorithms, e.g. matrix of pixel intensities in an image.
-  \item Outputs/labels $y$ are what we want to predict, easy to get by
-    asking a human, but hard to compute using traditional algorithms,
-    e.g. image class.
+    algorithms. For example, matrix of pixel intensities in an image.
+  \item Outputs/labels $y$ are what we want to predict, typically more
+    difficult/costly to measure than inputs. For example, to get an
+    image class label, you may have to ask a human. 
   \item Input $x$ = image of digit, output $y\in\{0,1,\dots,9\}$, \\--
     this is a classification problem with 10 classes.\\
   $f(\includegraphics[height=1cm]{mnist-0})=0$,
@@ -113,25 +113,26 @@
 
 \begin{frame}
   \frametitle{Overview of tutorial}
-  In this tutorial we will discuss two types of problems, which
-  different by the type of the output/label/y variable we want to predict.
+  In this tutorial we will discuss two kinds of problems, which
+  differ by the type of the output/label/y variable we want to predict.
   \begin{itemize}
   \item Regression, y is a real number.
   \item Classification, y is an integer representing a category.
   \end{itemize}
 
-  The rest of the tutorial will explain three learning problems:
-  \begin{itemize}
+  The rest of the tutorial will focus on three examples:
+  \begin{enumerate}
   \item Regression with a single input, to demonstrate how to avoid
     overfitting.
   \item Classification of digit images, to demonstrate how to compare
     machine learning algorithms in terms of test/prediction accuracy.
   \item Regression for predicting earth system model parameters, as a
     relevant application.
-  \end{itemize}
+  \end{enumerate}
 \end{frame}
 
-\section{Problem 1: avoiding overfitting in regression}
+\section{Example 1: avoiding overfitting in regression
+\includegraphics[height=2cm]{figure-overfitting-paper-loss}}  
  
 \begin{frame}
   \frametitle{Goal of this section: demonstrate how to avoid
@@ -351,7 +352,8 @@ gradient descent.
   \end{itemize}
 \end{frame}
 
-\section{Problem 2: classifying images of digits}
+\section{Example 2: classifying images of digits
+\includegraphics[height=2cm]{figure-validation-loss-digits}}
 
 \begin{frame}
   \frametitle{Image classification}
@@ -424,7 +426,7 @@ zip.y.mat <- keras::to_categorical(zip.dt$V1)
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Conversion to array for input to neural network}
+  \frametitle{Converting inputs to tensor (multi-dim array) for neural network}
 Use array function with all columns except first as data.  
 \begin{verbatim}
 zip.size <- 16
@@ -605,10 +607,10 @@ dense.model <- keras_model_sequential() %>%
   \includegraphics[width=\textwidth]{figure-test-accuracy-baseline}
 
   \begin{itemize}
-  \item Always a good idea to compare with the trivial baseline model which always
+  \item Always a good idea to compare with the trivial/featureless baseline model which always
     predicts the most frequent class in the train set. (ignoring all
     inputs/features) 
-  \item Here we see that the baseline is much less accurate than the
+  \item Here we see that the featureless baseline is much less accurate than the
     three learned models, which are clearly learning something non-trivial.
   \item Code for test accuracy figures:
     \url{https://github.com/tdhock/2020-yiqi-summer-school/blob/master/figure-test-accuracy.R}
@@ -633,7 +635,7 @@ dense.model <- keras_model_sequential() %>%
   \end{itemize}
 \end{frame}
 
-\section{Problem 3: predicting earth system model parameters}
+\section{Example 3: predicting earth system parameters \includegraphics[height=2cm]{figure-proda-inputs}} 
 
 \begin{frame}[fragile]
   \frametitle{Problem setting}
@@ -724,7 +726,7 @@ dense.model <- keras_model_sequential() %>%
   \end{frame}
 
 \begin{frame}
-  \frametitle{Neural networks often more accurate than baseline }
+  \frametitle{Neural networks often more accurate than featureless baseline }
   \centering
   \includegraphics[width=0.9\textwidth]{figure-proda-cv-data-map}
 
@@ -735,9 +737,50 @@ dense.model <- keras_model_sequential() %>%
   \item[Single-task:] 25 neural networks, each trained seperately to
     predict a single output.
   \item[baseline:] always predict the mean of the labels/outputs in
-    the train set (ignores inputs/features).
+    the train set (feaureless, ignores inputs/features).
   \end{description}
   
+\end{frame}
+
+\section{Summary and quiz questions}
+
+\begin{frame}
+  \frametitle{Summary}
+  Thanks for participating! We have studied
+  \begin{itemize}
+  \item Three examples of machine learning problems.
+  \item Two kinds of problems, regression y=real number,
+    classification y=integer category.
+  \item Splitting a data set into train/test/subtrain/validation sets
+    for learning hyper-parameters and evaluating prediction accuracy.
+  \item Overfitting and how to avoid it by choosing hyper-parameters
+    based on a validation set.
+  \item Comparing prediction accuracy of learning algorithms with each
+    other and to a featureless baseline.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Quiz questions}
+  \begin{itemize}
+\item When using a design matrix to represent machine learning inputs,
+  what does each row and column represent?
+\item When splitting data into train/test sets, what is the purpose of
+  each set? When splitting a train set into subtrain/validation sets,
+  what is the purpose of each set?
+\item In order to determine if any non-trivial predictive relationship
+  between inputs and output has been learned, a comparison with a
+  featureless baseline that ignores the inputs must be used. How do you compute
+  the baseline predictions, for regression and classification
+  problems?
+\item How can you tell if machine learning model predictions are
+  underfitting or overfitting?
+\item Many learning algorithms require input of the number of
+  iterations or epochs. For example in R the \texttt{nnet} function
+  has the \texttt{maxit} argument and the \text{keras::fit} function
+  has the \texttt{epochs} argument. How should this parameter be
+  chosen?
+  \end{itemize}
 \end{frame}
  
 \end{document}
