@@ -4,6 +4,8 @@ an application to earth system modeling
 * Prepared for the summer school 4th year, 2021
 
 - Summer school link: [[http://www2.nau.edu/luo-lab/?workshop][New Advances in Land Carbon Cycle Modeling]].
+- Download the textbook from [[https://www.taylorfrancis.com/books/oa-edit/10.1201/9780429155659/land-carbon-cycle-modeling-yiqi-luo-benjamin-smith][Taylor and Francis]] (I wrote chapter 36).
+- My [[file:HOCKING-chapter.pdf][book chapter PDF]] (same content as chapter 36 of textbook).
 - My [[https://youtu.be/c21etYEb-tE][Video on youtube]].
 - My [[raw/master/slides-short.pdf][Slides PDF]].
 - My [[https://forms.office.com/Pages/ResponsePage.aspx?id=n57UJ-GJoEqZo9NbV7K6A4W5m6WiFvFJkzgC_Y4KHq9UQkJTRjBVS1A5TDJBSkc5OUxKSDJEVkM3OC4u][Quiz]].
