@@ -308,10 +308,21 @@ train data,
   \mathcal L(\mathbf w, \mathbf v) = \frac{1}{N} \sum_{i=1}^N [ \mathbf w^\intercal \sigma( x_i \mathbf v ) - y_i ]^2. \label{eq:loss}
 \end{equation}
 Gradient descent begins using un-informative parameters
-$\mathbf w_0,\mathbf v_0$ (typically random numbers close to zero),
-then at each iteration $t\in\{1,\dots, T\}$ the parameters are
-improved by taking a step of size $\alpha>0$ in the negative gradient
-direction,
+$\mathbf w_0,\mathbf v_0$ (typically random numbers close to zero).
+The algorithm then attempts to compute model parameters that result in
+more accurate predictions (smaller mean squared error on train data).
+To do that, we first compute the gradient at the current model
+parameters $\nabla \mathcal L(\mathbf w_{0}, \mathbf v_{0})$, which is
+a vector (same size as the model parameters $\mathbf w,\mathbf v$)
+that indicates the direction of steepest ascent (where the mean
+squared error is most increasing).  If we move the parameters a small
+amount in the opposite direction (steepest descent), then we are
+guaranteed to get new parameters which result in smaller mean squared
+error. The main idea of the gradient descent learning algorithm is to
+iteratively apply this procedure.  More precisely, if we let
+$t\in\{1,\dots,T\}$ be the iteration number, and we let $\alpha>0$ be
+the step size, then the gradient descent algorithm computes the
+following new parameters at each iteration,
 \begin{eqnarray}
   \mathbf w_t &=& \mathbf w_{t-1} - \alpha \nabla_{\mathbf w} \mathcal L(\mathbf w_{t-1}, \mathbf v_{t-1}),\\
   \mathbf v_t &=& \mathbf v_{t-1} - \alpha \nabla_{\mathbf v} \mathcal L(\mathbf w_{t-1}, \mathbf v_{t-1}).
@@ -421,7 +432,7 @@ $T=512$ iterations/epochs the learned function is highly non-linear
 validation set). When the error rates are plotted as a function of a
 model complexity hyper-parameter such as $T$
 (Figure~\ref{fig:overfitting-paper}, right), we see the characteristic
-U shape for the validation error, and the monotonic decreasing train
+U shape for the validation error, and the monotonic decreasing subtrain
 error. The hyper-parameter with minimal validation error is $T=64$
 iterations/epochs; smaller $T$ values underfit or are overly
 regularized, and larger $T$ values overfit or are under-regularized.
