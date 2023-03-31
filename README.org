@@ -1,6 +1,10 @@
 Tutorial: introduction to machine learning and neural networks, with
 an application to earth system modeling
 
+* ASU Intro to Deep Learning in R talk
+
+[[file:figure-validation-loss-torch.R]]
+
 * Prepared for the summer school 4th year, 2021
 
 - Summer school link: [[http://www2.nau.edu/luo-lab/?workshop][New Advances in Land Carbon Cycle Modeling]].
