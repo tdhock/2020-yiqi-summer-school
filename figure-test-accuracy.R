@@ -101,7 +101,7 @@ gg.both <- ggplot()+
     size=stat.size,
     data=some.stats)
 png("figure-test-accuracy-both.png",
-    width=5.5, height=1.8, units="in", res=200)
+    width=5.5, height=1.8, units="in", res=300)
 print(gg.both)
 dev.off()
 

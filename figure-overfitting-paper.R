@@ -1,12 +1,5 @@
 library(data.table)
 library(ggplot2)
-library(keras)
-## from https://github.com/rstudio/keras/issues/937
-if(FALSE){
-  keras::install_keras(version = "2.1.6", tensorflow = "1.5")
-}
-keras::use_implementation("keras")
-keras::use_backend("tensorflow")
 
 n.folds <- 4
 unique.folds <- 1:n.folds
@@ -138,7 +131,7 @@ gg <- ggplot()+
     epochs, mse, label=set),
     method=list(cex=0.8, "last.qp"),
     data=nnet.loss.dt)
-png("figure-overfitting-paper-loss.png", width=2.5, height=2, units="in", res=200)
+png("figure-overfitting-paper-loss.png", width=2.5, height=2, units="in", res=300)
 print(gg)
 dev.off()
 dput(RColorBrewer::brewer.pal(Inf, "Dark2"))
@@ -169,7 +162,7 @@ sets.gg <- ggplot()+
   xlab("input/feature x")+
   ylab("output/label y")+
   coord_cartesian(ylim=c(-10, 20))
-png("figure-overfitting-paper.png", width=5, height=3, units="in", res=200)
+png("figure-overfitting-paper.png", width=5, height=3, units="in", res=300)
 print(sets.gg)
 dev.off()
  

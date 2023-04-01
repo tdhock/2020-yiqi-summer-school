@@ -49,7 +49,7 @@ gg <- ggplot()+
   theme(panel.spacing.x=grid::unit(0.4, "in"))+
   ylab("Learned function")+
   scale_x_continuous("Mean squared error on test set", n.breaks=4)
-png("figure-proda-cv-some-out.png", width=11, height=3, res=100, units="in")
+png("figure-proda-cv-some-out.png", width=11, height=3, res=300, units="in")
 print(gg)
 dev.off()
 

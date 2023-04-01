@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[12pt]{report}
 \usepackage{setspace}
 \doublespacing
 \usepackage{times}
@@ -34,28 +34,28 @@
   toby.hocking@nau.edu
 }
 
+\setcounter{chapter}{36}
+
 \maketitle
 
 
-% Your manuscript is 20 or fewer pages, double space, including figures and tables, for each lecture or practice. That makes about 10 book pages. Exception is possible for a few lectures.
-
-% Each manuscript may include 3-5 illustrations.
-
-% Manuscript should be written at a level to be understood by first-year graduate students. 
-
-% Each manuscript has a short, first paragraph (<50 words) about the training goal.
-
-% Do not have too many references as it is not a research paper but list a few suggested readings.
-
-% Include a few (4-6) quizzes for each lecture and expected homework for each practice.
-
-% Text in your chapter should be corresponding to the pre-recorded video or the video to be recorded.
-
-\paragraph{Objective.} In this chapter we introduce basic concepts and
-algorithms from machine learning. We explain how neural networks can
-be used for regression and classification problems, and how
-cross-validation can be used for training and testing machine learning
-algorithms.
+\begin{abstract}
+  In this chapter we introduce basic concepts and algorithms from
+  machine learning. We explain how neural networks can be trained for
+  regression and classification problems, and how cross-validation can
+  be used for training and testing machine learning algorithms. A
+  supervised machine learning algorithm can be used on a training data
+  set in order to infer a prediction function. The goal is to learn a
+  function which yields accurate predictions in a held-out set of test
+  data (which are not available to the learning algorithm at training
+  time). Both overfitting and underfitting can yield sub-optimal
+  predictions on held-out test data, and can be avoided by tuning
+  hyper-parameters using splits of train data into subtrain and
+  validation sets. Different learning algorithms can be compared by
+  computing prediction accuracy with respect to held-out test sets. We
+  conclude with a discussion of applications to image classification
+  and earth system model parameter prediction.
+\end{abstract}
 
 \section{Introduction and applications of machine learning}
 
@@ -129,7 +129,7 @@ during learning). To formalize this idea, and to compute quantitative
 evaluation metrics (accuracy/error rates), we need a test data set, as
 explained in the next section.
 
-\subsection{$K$-fold cross-validation for evaluating prediction/test accuracy}
+\subsection{$K$-fold cross-validation for evaluating prediction accuracy} 
 
 Each input $\mathbf x$ in a data set is typically represented as one
 of $N$ rows in a ``design matrix'' with $D$ columns (one for each
@@ -276,7 +276,7 @@ predict blood pressure or risk of heart attack. Since the output $y$
 is a real number (e.g., blood pressure of 120 mm mercury), we refer to
 this as a regression problem.
 
-\section{Avoiding under/overfitting in a neural network for regression}
+\section{Avoiding under- and over-fitting in a neural network}
 
 In this section we begin by explaining the prediction function and
 learning algorithm for a simple neural network. We then demonstrate
@@ -284,14 +284,14 @@ how the number of iterations of the learning algorithm can be selected
 using a validation set, in order to avoid underfitting and
 overfitting. 
 
-We consider a simple regression problem for which the input
+We assume that there is a train set of data to learn from. For
+example, consider a simple regression problem for which each input
 $x\in\mathbb R$ is a single real number ($D=1$ feature/column in the
-design matrix), and the output $y\in\mathbb R$ is as well. Using a
+design matrix), and each output $y\in\mathbb R$ is as well. Using a
 neural network with a single hidden layer of $U$ units, there are two
-unknown \keyword{parameter} vectors which need to be learned using the
-training data, $\mathbf w\in \mathbb R^U$ and
-$\mathbf v\in \mathbb R^U$. The prediction function $f$ is then
-defined as
+unknown \keyword{parameter} vectors which need to be learned,
+$\mathbf w\in \mathbb R^U$ and $\mathbf v\in \mathbb R^U$. The
+prediction function $f$ is then defined as
 \begin{equation}
   f(x) = \mathbf w^\intercal \sigma( x \mathbf v ) = \mathbf w^\intercal \mathbf z,
 \end{equation}
@@ -299,26 +299,33 @@ where $\sigma:\mathbb R^U\rightarrow \mathbb R^U$ is a non-linear
 activation function, and $\mathbf z\in \mathbb R^U$ is the vector of
 hidden units. Typical activation functions include the logistic
 sigmoid $\sigma(t)=1/(1+\exp(-t))$ and the rectifier (or rectified
-linear units, ReLU) $\sigma(t)=\max(0, t)$. The prediction function is
-learned using gradient descent, which is an algorithm that attempts to
-find parameters $\mathbf w,\mathbf v$ which minimize the mean squared
-error between the predictions and the corresponding labels in the $N$
-train data,
+linear units, ReLU) $\sigma(t)=\max(0, t)$. 
+
+Assuming there are $N$ data $(x_1,y_1),\dots,(x_N,y_N)$, we can learn
+the prediction function using gradient descent, which is an algorithm
+that attempts to find parameters $\mathbf w,\mathbf v$ that minimize
+the mean squared error between the predictions and the corresponding
+labels,
 \begin{equation}
   \mathcal L(\mathbf w, \mathbf v) = \frac{1}{N} \sum_{i=1}^N [ \mathbf w^\intercal \sigma( x_i \mathbf v ) - y_i ]^2. \label{eq:loss}
 \end{equation}
-Gradient descent begins using un-informative parameters
-$\mathbf w_0,\mathbf v_0$ (typically random numbers close to zero),
-then at each iteration $t\in\{1,\dots, T\}$ the parameters are
-improved by taking a step of size $\alpha>0$ in the negative gradient
-direction,
+Note that the mean squared error in the equation above is referred to
+as the ``loss function'' and should only be used when the desired
+output is a real number (for other kinds of outputs, a different loss
+function should be used). Gradient descent begins using
+un-informative parameters $\mathbf w_0,\mathbf v_0$ (typically random
+numbers close to zero), then at each iteration $t\in\{1,\dots, T\}$
+the parameters are improved by taking a step of size $\alpha>0$ in the
+negative gradient direction,
 \begin{eqnarray}
   \mathbf w_t &=& \mathbf w_{t-1} - \alpha \nabla_{\mathbf w} \mathcal L(\mathbf w_{t-1}, \mathbf v_{t-1}),\\
   \mathbf v_t &=& \mathbf v_{t-1} - \alpha \nabla_{\mathbf v} \mathcal L(\mathbf w_{t-1}, \mathbf v_{t-1}).
 \end{eqnarray}
-The algorithm described above is referred to as ``full gradient''
-because the gradient descent direction is defined using the full set
-of $N$ samples in the train set. Other common variants include
+These gradient steps have the effect of updating the parameters so
+that the resulting predictions achieve lower loss function values. The
+algorithm described above is referred to as ``full gradient'' because
+the gradient descent direction is defined using the full set of $N$
+samples. Other common variants include
 ``stochastic gradient'' (gradient uses one sample) and ``minibatch''
 (gradient uses several samples). When doing gradient descent on a
 neural network model, one ``epoch'' includes computing gradients once
@@ -432,7 +439,7 @@ parameter vectors, given fixed hyper parameters) and
 subtrain/validation splits (for learning hyper-parameter values to
 avoid under/overfitting).
 
-\section{Comparing neural networks for image classification}
+\section{Comparing prediction accuracy of neural networks}
 
 In this section we provide a comparison of
 several other neural networks for image classification. In general in
