@@ -25,6 +25,8 @@
 \newcommand{\ZZ}{\mathbb Z}
 \newcommand{\NN}{\mathbb N}
 
+%\pagenumbering{gobble}
+
 \begin{document}
 
 \title{Introduction to machine learning and neural networks}
@@ -70,16 +72,6 @@ domain-agnostic, which means they have been shown to provide highly
 accurate predictions in a wide variety of application domains
 (computer vision, speech recognition, automatic translation, biology,
 medicine, climate science, chemistry, geology, etc). 
-
-\begin{figure} 
-  \centering
-  \includegraphics[width=0.8\textwidth]{drawing-mnist-train-test.pdf}
-  \caption{A learning algorithm inputs a train data set, and outputs a
-    prediction function, g or h. Both g and h input a grayscale image
-    and output a class (integer from 0 to 9), but g is for  
-    digits and h is for fashion.}
-  \label{fig:drawing-mnist-train-test}
-\end{figure}
 
 For example, consider the problem of image classification from the
 application domain of computer vision. In this problem, we would like
@@ -175,20 +167,6 @@ ignores all of the inputs/features $\mathbf x$, and can be used to
 show that the algorithm is learning some non-trivial predictive relationship
 between inputs and outputs (for an example see
 Figure~\ref{fig:test-accuracy}).
-
-\begin{figure}
-  \centering
-  \includegraphics[width=\textwidth]{drawing-cross-validation}
-  \caption{$K=3$ fold cross-validation. \textbf{Left:} the first step
-    is to randomly assign a fold ID from 1 to $K$ to each of the
-    observations/rows. \textbf{Right:} in each of the
-    $k\in\{1, \dots, K\}$ splits, the observations with fold ID $k$
-    are set aside as a test set, and the other observations are used
-    as a train set to learn a prediction function (f1--f3), which is
-    used to predict for the test set, and to compute accuracy metrics
-    (A1--A3).}
-  \label{fig:cross-validation}
-\end{figure}
 
 The $K$-fold cross-validation procedure generates $K$ splits, and can
 therefore be used to estimate both mean and variance of prediction
@@ -312,23 +290,11 @@ labels,
 Note that the mean squared error in the equation above is referred to
 as the ``loss function'' and should only be used when the desired
 output is a real number (for other kinds of outputs, a different loss
-function should be used). 
-Gradient descent begins using un-informative parameters
-$\mathbf w_0,\mathbf v_0$ (typically random numbers close to zero).
-The algorithm then attempts to compute model parameters that result in
-more accurate predictions (smaller mean squared error on train data).
-To do that, we first compute the gradient at the current model
-parameters $\nabla \mathcal L(\mathbf w_{0}, \mathbf v_{0})$, which is
-a vector (same size as the model parameters $\mathbf w,\mathbf v$)
-that indicates the direction of steepest ascent (where the mean
-squared error is most increasing).  If we move the parameters a small
-amount in the opposite direction (steepest descent), then we are
-guaranteed to get new parameters which result in smaller mean squared
-error. The main idea of the gradient descent learning algorithm is to
-iteratively apply this procedure.  More precisely, if we let
-$t\in\{1,\dots,T\}$ be the iteration number, and we let $\alpha>0$ be
-the step size, then the gradient descent algorithm computes the
-following new parameters at each iteration,
+function should be used). Gradient descent begins using
+un-informative parameters $\mathbf w_0,\mathbf v_0$ (typically random
+numbers close to zero), then at each iteration $t\in\{1,\dots, T\}$
+the parameters are improved by taking a step of size $\alpha>0$ in the
+negative gradient direction,
 \begin{eqnarray}
   \mathbf w_t &=& \mathbf w_{t-1} - \alpha \nabla_{\mathbf w} \mathcal L(\mathbf w_{t-1}, \mathbf v_{t-1}),\\
   \mathbf v_t &=& \mathbf v_{t-1} - \alpha \nabla_{\mathbf v} \mathcal L(\mathbf w_{t-1}, \mathbf v_{t-1}).
@@ -359,28 +325,6 @@ data). Both underfitting and overfitting are bad, and need to be
 avoided, because the goal of any learning algorithm is to find a
 prediction function $f$ which provides accurate predictions in test
 data.
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.55\textwidth]{figure-overfitting-paper}
-  \includegraphics[width=0.4\textwidth]{figure-overfitting-paper-loss}   
-  \caption{Illustration of underfitting and overfitting in a neural
-    network regression model (single hidden layer, 50 hidden
-    units). \textbf{Left:} noisy data with a nonlinear sine wave
-    pattern (grey circles), learned functions (colored curves), and
-    residuals/errors (black line segments) are shown for three values
-    of epochs (panels from left to right) and two data subsets (panels
-    from top to bottom). \textbf{Right:} in each epoch the model
-    parameters are updated using gradient descent with respect to the
-    subtrain loss, which decreases with more epochs. The
-    optimal/minimum loss with respect to the validation set occurs at
-    64 epochs, indicating underfitting for smaller epochs (green
-    function, too regular/linear for both subtrain/validation sets)
-    and overfitting for larger epochs (purple function, very
-    irregular/nonlinear so good fit for subtrain but not validation
-    set).}
-  \label{fig:overfitting-paper}
-\end{figure}
 
 How can we select hyper-parameters which avoid overfitting? Note that
 the choice of hyper-parameters such as number of hidden units $U$ and
@@ -440,7 +384,7 @@ $T=512$ iterations/epochs the learned function is highly non-linear
 validation set). When the error rates are plotted as a function of a
 model complexity hyper-parameter such as $T$
 (Figure~\ref{fig:overfitting-paper}, right), we see the characteristic
-U shape for the validation error, and the monotonic decreasing subtrain
+U shape for the validation error, and the monotonic decreasing train
 error. The hyper-parameter with minimal validation error is $T=64$
 iterations/epochs; smaller $T$ values underfit or are overly
 regularized, and larger $T$ values overfit or are under-regularized.
@@ -556,16 +500,6 @@ than the dense model ($p=0.009$).
 % 2:        linear        dense 3.206378e-02
 % 3:         dense         conv 9.471852e-03
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{figure-test-accuracy-both}
-  \caption{Prediction accuracy of functions learned for image classification of handwritten digits. The
-    baseline function always predicts the most frequent class in the
-    train set; other three learned functions are neural
-    networks with different numbers of hidden layers (linear=0, conv=2, dense=8).}
-  \label{fig:test-accuracy}
-\end{figure}
-
 Overall from this comparison it is clear that, among these three
 neural networks, the sparse model should be
 preferred for most accurate predictions in this particular ``zip''
@@ -618,22 +552,6 @@ networks learn any non-trivial predictive relationship between inputs
 and output, we consider a baseline model which always predicts the
 mean of the train set label/output values (and does not use the inputs
 at all).
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.9\textwidth]{figure-proda-cv-data-map}
-
-  \includegraphics[width=0.9\textwidth]{figure-proda-cv-some-out}
-    \vskip -0.5cm
-  \caption{Cross-validation for estimating error rates of machine
-    learning algorithms that predict earth system model
-    parameters. \textbf{Top:} fold IDs were assigned to each
-    observation using longitude (left) or randomly
-    (right). \textbf{Bottom:} prediction error for four of the 25
-    outputs. Please see \citep{Feng2020} for meanings of abbreviations
-    (cryo, maxpsi, tau4s3, fs2s3). }
-  \label{fig:proda-cv}
-\end{figure}
 
 Here we show how $K=5$ fold cross-validation can be used to evaluate
 how well these neural networks predict each of the outputs at new
@@ -773,5 +691,89 @@ chapter can be freely downloaded from
 
 \bibliographystyle{abbrvnat}
 \bibliography{refs} 
+
+\newpage
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\textwidth]{drawing-mnist-train-test.pdf}
+  \caption{A learning algorithm inputs a train data set, and outputs a
+    prediction function, g or h. Both g and h input a grayscale image
+    and output a class (integer from 0 to 9), but g is for  
+    digits and h is for fashion.}
+  \label{fig:drawing-mnist-train-test}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{drawing-cross-validation}
+  \caption{$K=3$ fold cross-validation. \textbf{Left:} the first step
+    is to randomly assign a fold ID from 1 to $K$ to each of the
+    observations/rows. \textbf{Right:} in each of the
+    $k\in\{1, \dots, K\}$ splits, the observations with fold ID $k$
+    are set aside as a test set, and the other observations are used
+    as a train set to learn a prediction function (f1--f3), which is
+    used to predict for the test set, and to compute accuracy metrics
+    (A1--A3).}
+  \label{fig:cross-validation}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.55\textwidth]{figure-overfitting-paper}
+  \includegraphics[width=0.4\textwidth]{figure-overfitting-paper-loss}   
+  \caption{Illustration of underfitting and overfitting in a neural
+    network regression model (single hidden layer, 50 hidden
+    units). \textbf{Left:} noisy data with a nonlinear sine wave
+    pattern (grey circles), learned functions (colored curves), and
+    residuals/errors (black line segments) are shown for three values
+    of epochs (panels from left to right) and two data subsets (panels
+    from top to bottom). \textbf{Right:} in each epoch the model
+    parameters are updated using gradient descent with respect to the
+    subtrain loss, which decreases with more epochs. The
+    optimal/minimum loss with respect to the validation set occurs at
+    64 epochs, indicating underfitting for smaller epochs (green
+    function, too regular/linear for both subtrain/validation sets)
+    and overfitting for larger epochs (purple function, very
+    irregular/nonlinear so good fit for subtrain but not validation
+    set).}
+  \label{fig:overfitting-paper}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figure-test-accuracy-both}
+  \caption{Prediction accuracy of functions learned for image classification of handwritten digits. The
+    baseline function always predicts the most frequent class in the
+    train set; other three learned functions are neural
+    networks with different numbers of hidden layers (linear=0, conv=2, dense=8).}
+  \label{fig:test-accuracy}
+\end{figure}
+
+\newpage
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{figure-proda-cv-data-map}
+
+  \includegraphics[width=0.9\textwidth]{figure-proda-cv-some-out}
+    \vskip -0.5cm
+  \caption{Cross-validation for estimating error rates of machine
+    learning algorithms that predict earth system model
+    parameters. \textbf{Top:} fold IDs were assigned to each
+    observation using longitude (left) or randomly
+    (right). \textbf{Bottom:} prediction error for four of the 25
+    outputs. Please see \citep{Feng2020} for meanings of abbreviations
+    (cryo, maxpsi, tau4s3, fs2s3). }
+  \label{fig:proda-cv}
+\end{figure}
+
+
 
 \end{document}
