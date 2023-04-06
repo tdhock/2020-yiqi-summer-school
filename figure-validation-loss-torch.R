@@ -3,17 +3,19 @@ library(ggplot2)
 library(torch)
 source("download.R")
 zip.dt <- data.table::fread("zip.gz")
+zip.y.array <- array(zip.dt$V1, nrow(zip.dt))
+zip.y.tensor <- torch::torch_tensor(zip.y.array+1L, torch::torch_long())
+head(zip.y.tensor)
+
 zip.feature.dt <- zip.dt[,-1]
 (zip.size <- sqrt(ncol(zip.feature.dt)))
 zip.X.array <- array(
   unlist(zip.feature.dt),
   c(nrow(zip.dt), 1, zip.size, zip.size))
-image(zip.X.array[1,,,])
-str(zip.X.array)
 zip.X.tensor <- torch::torch_tensor(zip.X.array)
 str(zip.X.tensor)
-zip.y.array <- array(zip.dt$V1, c(nrow(zip.dt)))
-zip.y.tensor <- torch::torch_tensor(zip.y.array+1L, torch::torch_long())
+
+image(zip.X.array[1,,,])
 str(zip.y.tensor)
 
 ## some digits to display.
@@ -44,7 +46,10 @@ dev.off()
 
 ## Linear model is defined by a vector of weights, one for each input
 ## feature, and intercept/bias.
-n.classes <- length(unique(zip.y.array))
+(n.classes <- length(unique(zip.y.array)))
+(linear.model <- torch::nn_sequential(
+  torch::nn_flatten(),
+  torch::nn_linear(ncol(zip.feature.dt), n.classes)))
 linear.obj <- torch::nn_linear(ncol(zip.feature.dt), n.classes)
 linear.obj$weight
 linear.obj$bias
@@ -58,6 +63,17 @@ pred.tensor <- linear.seq(zip.X.tensor)
 loss.fun <- torch::nn_cross_entropy_loss()
 loss.tensor <- loss.fun(pred.tensor, zip.y.tensor)
 loss.tensor$backward()
+
+get_loss <- function(L, model, index.vec=seq_along(L$y)){
+  X <- L$X[index.vec,,,,drop=FALSE]
+  y <- L$y[index.vec]
+  pred <- model(X)
+  loss.fun(pred, y)
+}
+
+get_loss(list(X=zip.X.tensor, y=zip.y.tensor), linear.seq)
+
+
 
 step.size <- 0.1
 linear.obj$bias
@@ -73,6 +89,13 @@ optimizer <- torch::optim_sgd(linear.seq$parameters, lr=step.size)
 linear.obj$bias
 optimizer$step()
 
+get_batch_list <- function(n_data, batch_size=200){
+  n_batches <- ceiling(n_data / batch_size)
+  batch.vec <- sample(rep(1:n_batches,each=batch_size)[1:n_data])
+  split(seq_along(batch.vec), batch.vec)
+}
+
+## torch batching.
 zip_dataset <- torch::dataset(
   name = "subtrain_dataset",
   initialize = function(X.tensor, y.tensor) {
@@ -86,12 +109,21 @@ zip_dataset <- torch::dataset(
     self$y$size()
   }
 )
+zip_dataset <- zip_dataset(zip.X.tensor, zip.y.tensor)
+zip.batch.list <- zip_dataset$.getbatch(1:2)
+zip_loader <- torch::dataloader(zip_dataset, batch_size=batch_size, shuffle=TRUE)
 
-get_loss <- function(L, index.vec=seq_along(L$y)){
-  X <- L$X[index.vec,,,,drop=FALSE]
-  y <- L$y[index.vec]
-  pred <- linear.model(X)
-  loss.fun(pred, y)
+## my batching.
+take_steps <- function(subtrain.list, model, batch_size=200, step.size=0.1){
+  optimizer <- torch::optim_sgd(model$parameters, lr=step.size)
+  batch.list <- get_batch_list(length(subtrain.list$y), batch_size)
+  for(batch.number in seq_along(batch.list)){
+    batch.indices <- batch.list[[batch.number]]
+    batch.loss <- get_loss(subtrain.list, model, batch.indices)
+    optimizer$zero_grad()
+    batch.loss$backward()
+    optimizer$step()
+  }
 }
 
 n.folds <- 3
@@ -100,49 +132,35 @@ uniq.folds <- 1:n.folds
 set.seed(1)
 fold.vec <- sample(rep(uniq.folds, l=nrow(zip.dt)))
 loss.dt.list <- list()
-for(test.fold in uniq.folds){
-  is.train <- fold.vec!=test.fold
-  train.i <- which(is.train)
-  is.subtrain <- rep(c(TRUE,TRUE,FALSE),l=length(train.i))
-  is.set.list <- list(
-    test=!is.train,
-    subtrain=train.i[is.subtrain],
-    validation=train.i[!is.subtrain])
-  tensor.list <- list()
-  for(set.name in names(is.set.list)){
-    is.set <- is.set.list[[set.name]]
-    tensor.list[[set.name]] <- list(
-      X=zip.X.tensor[is.set,,,,drop=FALSE],
-      y=zip.y.tensor[is.set])
-  }
-  subtrain_dataset <- zip_dataset(tensor.list$subtrain$X, tensor.list$subtrain$y)
-  subtrain.batch.list <- subtrain_dataset$.getbatch(1:2)
-  linear.model <- torch::nn_sequential(
-    torch::nn_flatten(),
-    torch::nn_linear(ncol(zip.feature.dt), n.classes))
-  optimizer <- torch::optim_sgd(linear.model$parameters, lr=step.size)
-  batch_size=200
-  subtrain_loader <- torch::dataloader(subtrain_dataset, batch_size=batch_size, shuffle=TRUE)
-  n.subtrain <- length(tensor.list$subtrain$y)
-  for(epoch in 1:num_epochs){
-    batch.vec <- sample(rep(1:batch_size,l=n.subtrain))
-    batch.list <- split(seq_along(batch.vec), batch.vec)
-    for(batch.number in seq_along(batch.list)){
-      batch.indices <- batch.list[[batch.number]]
-      batch.loss <- get_loss(tensor.list$subtrain, batch.indices)
-      optimizer$zero_grad()
-      batch.loss$backward()
-      optimizer$step()
+test.fold <- 1
+is.train <- fold.vec!=test.fold
+train.i <- which(is.train)
+is.subtrain <- rep(c(TRUE,TRUE,FALSE),l=length(train.i))
+is.set.list <- list(
+  test=!is.train,
+  subtrain=train.i[is.subtrain],
+  validation=train.i[!is.subtrain])
+tensor.list <- list()
+for(set.name in names(is.set.list)){
+  is.set <- is.set.list[[set.name]]
+  tensor.list[[set.name]] <- list(
+    X=zip.X.tensor[is.set,,,,drop=FALSE],
+    y=zip.y.tensor[is.set])
+}
+linear.model <- torch::nn_sequential(
+  torch::nn_flatten(),
+  torch::nn_linear(ncol(zip.feature.dt), n.classes))
+n.subtrain <- length(tensor.list$subtrain$y)
+for(epoch in 1:num_epochs){
+  take_steps(tensor.list$subtrain, linear.model)
+  torch::with_no_grad({
+    for(set in c("subtrain", "validation")){
+      set.data <- tensor.list[[set]]
+      set.loss <- get_loss(set.data, linear.model)
+      loss.dt.list[[paste(test.fold, epoch, set)]] <- print(data.table(
+        test.fold, epoch, set, loss=as.numeric(set.loss)))
     }
-    torch::with_no_grad({
-      for(set in c("subtrain", "validation")){
-        set.data <- tensor.list[[set]]
-        set.loss <- get_loss(set.data)
-        loss.dt.list[[paste(test.fold, epoch, set)]] <- print(data.table(
-          test.fold, epoch, set, loss=as.numeric(set.loss)))
-      }
-    })
-  }
+  })
 }
 (loss.dt <- rbindlist(loss.dt.list))
 
@@ -155,14 +173,19 @@ gg <- ggplot()+
     epoch, loss, color=set),
     data=loss.dt)+
   geom_point(aes(
-    epoch, loss, color=set),
-    data=min.dt)+
+    epoch, loss, color=set, shape=point),
+    data=data.table(point="min", min.dt))+
   scale_y_log10("loss value (lower for better predictions)")+
   scale_x_continuous(
     "epoch (gradient descent passes through subtrain data)",
     limits=c(0, num_epochs*1.2),
     breaks=seq(0, num_epochs, by=10))
-directlabels::direct.label(gg, "right.polygons")
+dl <- directlabels::direct.label(gg, "right.polygons")
+png(
+  "figure-validation-loss-torch-linear.png", 
+  width=6, height=4, units="in", res=200)
+print(dl)
+dev.off()
 
 linear.metrics <- linear.model %>% fit(
   zip.X.array, zip.y.mat,
