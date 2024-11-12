@@ -17,6 +17,7 @@ keep.dt.list <- lapply(keep.mat.list, data.table)
 keep.EnvInfo <- data.table(in.mat[keep,])
 
 west.to.east <- c("West","Mid","East")
+west.to.east <- c("West","East")
 n.folds <- length(west.to.east)
 unique.folds <- 1:n.folds
 set.seed(1)
@@ -39,6 +40,16 @@ same_other_sizes_cv$instantiate(reg.task)
 
 show.iterations <- same_other_sizes_cv$instance$iteration.dt[
   test.fold==1]
+set.colors <- c(
+  train="red",
+  test="black",
+  ignored="grey")
+##> dput(RColorBrewer::brewer.pal(Inf,"Set1"))
+##c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33",
+set.colors <- c(
+  train="#A65628",
+  test="#EEEE33",#"#F781BF",
+  ignored="grey")
 for(show.i in 1:nrow(show.iterations)){
   one.it <- show.iterations[show.i]
   one.task <- data.table(task.dt)[
@@ -53,19 +64,16 @@ for(show.i in 1:nrow(show.iterations)){
     theme_bw()+
     theme(legend.position=c(0.9,0.2))+
     geom_point(aes(
-      Lon, Lat, color=set),
-      shape=20,
+      Lon, Lat, fill=set),
+      shape=21,
       data=one.task)+
     geom_text(aes(
       -110, 25, label=sprintf(
         "test=%s train=%s fold=%s",
         test.subset, train.subsets, test.fold)),
       data=one.it)+
-    scale_color_manual(
-      values=c(
-        train="red",
-        test="black",
-        ignored="grey"))+
+    scale_fill_manual(
+      values=set.colors)+
     coord_quickmap()+
     scale_x_continuous(
       breaks=seq(-200, 0, by=5))
