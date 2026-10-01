@@ -41,10 +41,9 @@ same_other_sizes_cv$instantiate(reg.task)
 show.iterations <- same_other_sizes_cv$instance$iteration.dt[
   test.fold==1]
 set.colors <- c(
-  train="blue",
-  test="red",#"#F781BF",
+  train="#ef686d",
+  test="#53ccff",
   ignored="white")
-
 for(show.i in 1:nrow(show.iterations)){
   one.it <- show.iterations[show.i]
   one.task <- data.table(task.dt)[

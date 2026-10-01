@@ -6,15 +6,14 @@ shown.outputs <- c("cryo", "maxpsi", "tau4s3", "fs2s3")
 ## variables were used (line 146 to 164 in nn_clm_cen.py).
 var4nn <- c('IGBP', 'Climate', 'Soil_Type', 'NPPmean', 'NPPmax', 'NPPmin', 'Veg_Cover', 'BIO1', 'BIO2', 'BIO3', 'BIO4', 'BIO5', 'BIO6', 'BIO7', 'BIO8', 'BIO9', 'BIO10', 'BIO11', 'BIO12', 'BIO13', 'BIO14', 'BIO15', 'BIO16', 'BIO17', 'BIO18', 'BIO19', 'Abs_Depth_to_Bedrock', 'Bulk_Density_0cm', 'Bulk_Density_30cm', 'Bulk_Density_100cm','CEC_0cm', 'CEC_30cm', 'CEC_100cm', 'Clay_Content_0cm', 'Clay_Content_30cm', 'Clay_Content_100cm', 'Coarse_Fragments_v_0cm', 'Coarse_Fragments_v_30cm', 'Coarse_Fragments_v_100cm', 'Depth_Bedrock_R', 'Garde_Acid', 'Occurrence_R_Horizon', 'pH_Water_0cm', 'pH_Water_30cm', 'pH_Water_100cm', 'Sand_Content_0cm', 'Sand_Content_30cm', 'Sand_Content_100cm', 'Silt_Content_0cm', 'Silt_Content_30cm', 'Silt_Content_100cm', 'SWC_v_Wilting_Point_0cm', 'SWC_v_Wilting_Point_30cm', 'SWC_v_Wilting_Point_100cm', 'Texture_USDA_0cm', 'Texture_USDA_30cm', 'Texture_USDA_100cm', 'USDA_Suborder', 'WRB_Subgroup', 'Drought')
 in.dt <- fread("figure-proda-cv-matlab.csv")
-in.mat <- as.matrix(in.dt)
-all.finite <- function(x)apply(is.finite(x), 1, all)
-all.mat.list <- list(
-  input=scale(in.mat[, var4nn]),
-  output=in.mat[,shown.outputs])
-keep <- do.call("&", lapply(all.mat.list, all.finite))
-keep.mat.list <- lapply(all.mat.list, function(m)m[keep,])
-keep.dt.list <- lapply(keep.mat.list, data.table)
-keep.EnvInfo <- data.table(in.mat[keep,])
+myround <- function(x)round(x/2)
+(keep.EnvInfo <- in.dt[
+  #seq(1, .N, by=10)
+][
+, ll := paste(myround(Lat), myround(Lon))
+][
+, .SD[1], by=ll
+][])
 
 west.to.east <- c("West","Mid","East")
 west.to.east <- c("West","East")
@@ -30,20 +29,27 @@ for(cv in names(fold.list)){
   fold.dt <- data.table(keep.EnvInfo[, .(Lat, Lon)], fold=fold.list[[cv]])
   for(test.fold in unique.folds){
     std.dt.list[[paste(cv, test.fold)]] <- data.table(
-      cv, test.fold,
+      CV=factor(cv, c("Standard", "Block")), test.fold,
       fold.dt[, set := ifelse(fold==test.fold, "test", "train")][]
     )
   }
 }
 (std.dt <- rbindlist(std.dt.list))
 
+set.colors <- c(
+  train="#ef686d",
+  test="#53ccff",
+  ignored="white")
 gg <- ggplot()+
   theme_bw()+
-  theme(panel.spacing=grid::unit(0,"lines"))+
-  ggtitle("Train/test splits for blocked and standard cross-validation")+
+  theme(
+    legend.position="none",
+    panel.spacing=grid::unit(0,"lines"))+
+  ggtitle("Previous: standard and blocked train/splits")+
   geom_point(aes(
     Lon, Lat, fill=set),
     shape=21,
+    color="grey",
     data=std.dt)+
   scale_fill_manual(
     values=set.colors)+
@@ -54,31 +60,26 @@ gg <- ggplot()+
   scale_y_continuous(
     "",
     breaks=NULL)+
-  facet_grid(test.fold ~ cv, labeller=label_both)
-png("figure-proda-cv-map-panels-std.png", width=6, height=3, units="in", res=200)
+  facet_grid(test.fold ~ CV, labeller=label_both)
+png("figure-proda-cv-map-panels-std.png", width=3.8, height=2.5, units="in", res=200)
 print(gg)
 dev.off()
 
-with(fold.list, table(Lon, random))
 task.dt <- data.table(
   keep.EnvInfo,
-  LonSubset=west.to.east[fold.list$Lon]
+  LonSubset=west.to.east[fold.list$Block]
 )
 reg.task <- mlr3::TaskRegr$new(
   "EarthSysParam", task.dt,
   target="fs2s3")#easy
 reg.task$col_roles$feature <- var4nn
 same_other_sizes_cv <- mlr3resampling::ResamplingSameOtherSizesCV$new()
-same_other_sizes_cv$param_set$values$folds <- 3
+same_other_sizes_cv$param_set$values$folds <- 4
 reg.task$col_roles$subset <- "LonSubset" 
 same_other_sizes_cv$instantiate(reg.task)
 
 show.iterations <- same_other_sizes_cv$instance$iteration.dt
 
-set.colors <- c(
-  train="blue",
-  test="red",#"#F781BF",
-  ignored="white")
 out.dt.list <- list()
 for(show.i in 1:nrow(show.iterations)){
   one.it <- show.iterations[show.i]
@@ -94,15 +95,16 @@ for(show.i in 1:nrow(show.iterations)){
     one.task[, .(Lat, Lon, set)]
   )
 }
-(out.dt <- rbindlist(out.dt.list)[test.subset=="West" & train.subsets!="all"])
+(out.dt <- rbindlist(out.dt.list)[test.subset=="West"][, Train := factor(train.subsets, c("other","same","all"))][])
 
 gg <- ggplot()+
   theme_bw()+
   theme(panel.spacing=grid::unit(0,"lines"))+
-  ggtitle("SOAK train/test splits for test subset=West")+
+  ggtitle("Proposed: SOAK train/test splits for test subset=West")+
   geom_point(aes(
     Lon, Lat, fill=set),
     shape=21,
+    color="grey",
     data=out.dt)+
   scale_fill_manual(
     values=set.colors)+
@@ -113,7 +115,7 @@ gg <- ggplot()+
   scale_y_continuous(
     "",
     breaks=NULL)+
-  facet_grid(test.fold ~ train.subsets, labeller=label_both)
+  facet_grid(test.fold ~ Train, labeller=label_both)
 png("figure-proda-cv-map-panels.png", width=6, height=4, units="in", res=200)
 print(gg)
 dev.off()
