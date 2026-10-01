@@ -76,6 +76,14 @@ Supplementary youtube screencasts showing R command line use:
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1MvTf_JOI00_eIPcoeYMM_o][Number of hidden units is a regularization parameter (R keras)]]
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
 
+** 30 Sept 2026
+
+[[file:figure-proda-cv-map-panels.R]] makes
+
+[[file:figure-proda-cv-map-panels-std.png]]
+
+[[file:figure-proda-cv-map-panels.png]]
+  
 ** 1 Nov 2024
 
 [[file:figure-proda-cv-map.R]] makes figures for explaining [[https://arxiv.org/abs/2410.08643][SOAK]]
