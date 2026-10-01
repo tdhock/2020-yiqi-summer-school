@@ -41,15 +41,10 @@ same_other_sizes_cv$instantiate(reg.task)
 show.iterations <- same_other_sizes_cv$instance$iteration.dt[
   test.fold==1]
 set.colors <- c(
-  train="red",
-  test="black",
-  ignored="grey")
-##> dput(RColorBrewer::brewer.pal(Inf,"Set1"))
-##c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33",
-set.colors <- c(
-  train="#A65628",
-  test="#EEEE33",#"#F781BF",
-  ignored="grey")
+  train="blue",
+  test="red",#"#F781BF",
+  ignored="white")
+
 for(show.i in 1:nrow(show.iterations)){
   one.it <- show.iterations[show.i]
   one.task <- data.table(task.dt)[

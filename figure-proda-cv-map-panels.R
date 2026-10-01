@@ -74,12 +74,6 @@ reg.task$col_roles$subset <- "LonSubset"
 same_other_sizes_cv$instantiate(reg.task)
 
 show.iterations <- same_other_sizes_cv$instance$iteration.dt
-set.colors <- c(
-  train="red",
-  test="black",
-  ignored="grey")
-##> dput(RColorBrewer::brewer.pal(Inf,"Set1"))
-##c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33",
 
 set.colors <- c(
   train="blue",
