@@ -76,6 +76,18 @@ Supplementary youtube screencasts showing R command line use:
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1MvTf_JOI00_eIPcoeYMM_o][Number of hidden units is a regularization parameter (R keras)]]
 - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V][Convolutional neural networks (R keras)]]
 
+** 1 Oct 2026
+
+[[file:figure-proda-cv-map-imbalanced.R]] makes
+
+[[file:figure-proda-cv-map-imbalanced.png]]
+
+[[file:figure-proda-cv-map-imbalanced-std.png]]
+
+which are pasted onto [[https://docs.google.com/presentation/d/1CsBYOMfbD5fiZoF_Eh6SjFOlifxzSEeKE2-sId2IISI/edit?slide=id.h3319874cdbc1fc73_0_0#slide=id.h3319874cdbc1fc73_0_0][this slide]] and then screenshot:
+
+[[file:figure-proda-cv-map-imbalanced-table.png]]
+
 ** 30 Sept 2026
 
 [[file:figure-proda-cv-map-panels.R]] makes
