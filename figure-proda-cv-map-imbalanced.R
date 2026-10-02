@@ -103,7 +103,8 @@ for(show.i in 1:nrow(show.iterations)){
     one.task[, .(Lat, Lon, set)]
   )
 }
-(out.dt <- rbindlist(out.dt.list)[test.subset=="West"][, Train := factor(ifelse(n.train.groups<groups, "other-D", train.subsets), c("other","same","other-D"))][])
+other.D <- "other\ndownsample"
+(out.dt <- rbindlist(out.dt.list)[test.subset=="West"][, Train := factor(ifelse(n.train.groups<groups, other.D, train.subsets), c("other","same",other.D))][])
 table(out.dt$Train)
 
 gg <- ggplot()+
